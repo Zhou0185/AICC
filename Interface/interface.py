@@ -119,7 +119,7 @@ class AICCInterface(tk.Tk):
             parser.add_argument('--weight_path', default='/mnt/data/zrj/Mymodel/CELLSsplit_v4_best_e20.pth',
                                 help='path where the trained weights saved')  # 4_32服务器
             # parser.add_argument('--weight_path', default='/mnt/data/zrj/Mymodel/CELLSsplit_v4_best_e1500.pth',
-            #                     help='path where the trained weights saved')  # 4_4服务器
+            #                     help='path where the trained weights saved')  # 4_32服务器
 
             # CELLSsplitlatest1024b8e2000 CELLSlatestb8e2000 Cellsplitv3lastb4e2000.pth
             # parser.add_argument('--gpu_id', default=0, type=int, help='the gpu used for evaluation')
@@ -277,9 +277,9 @@ class AICCInterface(tk.Tk):
         print("init_popup_menu")
         # For range speification
         self.popup_menu = tk.Menu(self, tearoff=0)
-        self.popup_menu.add_command(label='add missing point', command=self.popup_menu_2)
-        self.popup_menu.add_command(label='remove redundant points', command=self.popup_menu_1)
-        self.popup_menu.add_command(label='remove erroneous points', command=self.popup_menu_0)
+        self.popup_menu.add_command(label='add missing points', command=self.popup_menu_2, font = 50)
+        self.popup_menu.add_command(label='remove redundant points', command=self.popup_menu_1, font = 50)
+        self.popup_menu.add_command(label='remove erroneous points', command=self.popup_menu_0, font = 50)
 
         # self.popup_menu.add_command(label='box_add', command=self.popup_menu_3)
         # self.popup_menu.add_command(label='box_del', command=self.popup_menu_4)

@@ -1,6 +1,6 @@
 # **Interactive Interface**
 
-![Local GIF](./interface_demo.gif)
+![Local GIF](./aicc_demo.gif)
 
 ## Start Interface
 ```
