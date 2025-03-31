@@ -14,10 +14,10 @@ The Data folder should be organized as follows:
 - 📂 **Data**
   - 📂 **NEFCell**
     - 📂 **DATA_ROOT**
-     - 📂 **train**
-       - 📂 **train_file**
-       - 📂 **images**
-       - 📂 **ground_truth**
+      - 📂 **train**
+        - 📂 **train_file**
+        - 📂 **images**
+        - 📂 **ground_truth**
      - 📂 **testval**
      - 📂 **test**
 
