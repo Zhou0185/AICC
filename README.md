@@ -40,3 +40,18 @@ pip install omegaconf
 pip install pyyaml
 pip install requests
 ```
+## Interactive Interface
+We provide an interactive demo. Check it in the Interface folder. <br>
+```
+cd ./Interface
+python interface.py
+```
+## Simulation of Interaction
+P2PNet_simulation_sixboxes.py to compare with interactive counting method.
+```
+python P2PNet_simulation_sixboxes.py
+```
+P2PNet_simulation_threeboxes.py to compare with non-interactive counting method.
+```
+python P2PNet_simulation_threeboxes.py
+```
