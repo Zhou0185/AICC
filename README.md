@@ -18,8 +18,8 @@ The Data folder should be organized as follows:
         - 📂 **train_file**
         - 📂 **images**
         - 📂 **ground_truth**
-     - 📂 **testval**
-     - 📂 **test**
+      - 📂 **testval**
+      - 📂 **test**
 
 The Checkpoints folder should be organized as follows:
 - 📂 **Checkpoints**
