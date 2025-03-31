@@ -99,177 +99,6 @@ def calculate_ssim(y_true, y_pred):
     denom = (u_true ** 2 + u_pred ** 2 + c1) * (var_pred + var_true + c2)
     return ssim / denom
 
-def dataplot_v3_drawbox(inf,model,device,transform):
-    #log_path = "/media/xd/zrj/MyData/test_interact_v3/interact_log_Cellsplitv3lastb4e2000.txt"
-    root_path = "/media/xd/zrj/Prjs/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v3/DATA_ROOT/test"
-    Display_width = 640
-    Display_height = 640
-
-    print(inf)#得到box坐标，图片名称
-    ind_box = inf.find("sized_interact_box_area")
-    box_area = inf[ind_box:].split("(")[1].split(")")[0].split(",")
-
-    ind_gtc = inf.find("gt_count:")
-    gt_count = int(inf[ind_gtc:].split(":")[1].split(" ")[0])
-
-    img_name = inf.split("images/")[1].split(" ")[0]
-    #print(img_name)
-    Image_path = root_path+"/images/"+img_name
-    img_raw = Image.open(Image_path).convert('RGB')
-    width, height = img_raw.size
-    new_width = width // 128 * 128
-    new_height = height // 128 * 128
-    img_raw = img_raw.resize((new_width, new_height), Image.LANCZOS)
-    # pre-proccessing
-    img = transform(img_raw)
-    samples = torch.Tensor(img).unsqueeze(0)
-    samples = samples.to(device)  # print(samples.shape)
-    # run inference
-    threshold = 0.5
-    outputs, simifeat = model(samples)  # 原文是outputs = model(samples)，但改了p2pnet的forward的return
-    outputs_points = outputs['pred_points'][0]
-    outputs_scores = torch.nn.functional.softmax(outputs['pred_logits'], -1)[:, :, 1][
-        0]  # [:, :, 1][0]为错误点的概率
-    points_05 = outputs_points[outputs_scores > threshold].detach().cpu().numpy().tolist()
-    points_005 = outputs_points[outputs_scores > 0.05].detach().cpu().numpy().tolist()
-    img_ini = DrawfPoints(points_05,Image_path)
-    predict_cnt = len(points_05)
-    print(predict_cnt)
-
-    #坐标还原原图尺寸
-    EXEMPLAR_BBX_ori = (int(box_area[0].strip()),int(box_area[1].strip()),
-                  int(box_area[2].strip()),int(box_area[3].strip()))
-    EXEMPLAR_BBX=(int(box_area[0].strip())*width/Display_width,int(box_area[1].strip())*width/Display_width,
-                  int(box_area[2].strip())*height/Display_height,int(box_area[3].strip())*height/Display_height)
-    print(EXEMPLAR_BBX_ori)
-    img_n = Image.fromarray(np.uint8(img_ini))
-    draw = ImageDraw.Draw(img_n)
-    draw.rectangle(EXEMPLAR_BBX, outline='red', width=2)
-    # plt.imshow(img_n)
-    # plt.show()  # 显示图片
-
-    #得到gt的点坐标，不只是count
-    gt_path_root = root_path + "/test_file"
-    gt_path = gt_path_root + "/" + img_name.split('.')[0] + ".txt"
-    with open(gt_path, 'r') as f:
-        points = f.readlines()
-        # print(points)
-        p_gt = [[int(point.split(" ")[0]), int(point.split(" ")[1].strip())] for point in
-                points]
-        print("len(p_gt):", len(p_gt), p_gt)
-    return img_n,EXEMPLAR_BBX_ori,Image_path,points_05,points_005,gt_count,\
-           Display_width,Display_height,new_width,new_height,p_gt
-
-def interactive_adaptation_box_add(img_n,EXEMPLAR_BBX,Image_path,points_05,points_005,gt_count,Display_width,Display_height,Image_Ori_W,Image_Ori_H):
-    def SizedPoints(points):
-        sizedpoints = []
-        data = points
-        llen = len(data)
-        for i in range(llen):
-            x = round(int(data[i][0]) * Display_width // Image_Ori_W)
-            y = round(int(data[i][1]) * Display_height // Image_Ori_H)
-            sizedpoints.append((x, y))
-            # print(int(data[i][0]),int(data[i][1]),"__",x,y)
-        return sizedpoints
-    def DrawPointi(pointsraw,sindex,img_n):
-        draw = ImageDraw.Draw(img_n)
-        draw.ellipse((pointsraw[sindex][0] - 2, pointsraw[sindex][1] - 2, pointsraw[sindex][0] + 2,
-                      pointsraw[sindex][1] + 2), width=2,
-                     outline='red', fill=(255, 0, 0))
-        return img_n
-    add_points = []
-    x_min = min(EXEMPLAR_BBX[0], EXEMPLAR_BBX[2])#self.EXEMPLAR_START_X, self.EXEMPLAR_END_X
-    x_max = max(EXEMPLAR_BBX[0], EXEMPLAR_BBX[2])#self.EXEMPLAR_START_X, self.EXEMPLAR_END_X
-    y_min = min(EXEMPLAR_BBX[1], EXEMPLAR_BBX[3])#self.EXEMPLAR_START_Y, self.EXEMPLAR_END_Y
-    y_max = max(EXEMPLAR_BBX[1], EXEMPLAR_BBX[3])#self.EXEMPLAR_START_Y, self.EXEMPLAR_END_Y
-    x_len = x_max - x_min
-    y_len = y_max - y_min
-    #得到框内的图像信息
-    crop_area_base = (x_min, y_min, x_max, y_max)
-    #print("crop_area_base",crop_area_base)
-    Input_Image = Image.open(Image_path).convert('RGB').resize((Display_width,Display_height), Image.LANCZOS)
-    crop_img_base = Input_Image.copy().crop(crop_area_base)
-    crop_img_base = crop_img_base.convert('L')#转换成灰度图
-    # plt.imshow(crop_img_base)
-    # plt.show()  # 显示图片
-    img_array_n = np.array(crop_img_base).reshape(1, -1)
-    max_pixel = max(img_array_n[0])#得到框选图像的最大像素值
-    #print("max_pixel:",max_pixel)
-    # mean_pixel = np.mean(img_array_n[0])#得到框选图像的平均像素值
-    # print("mean_pixel:",mean_pixel)
-    #为所有点画框(置信度大于0.05)
-    selectedp_list = []
-    sizedpointsraw_05 = SizedPoints(points_05)
-    sizedpointsraw_005 = SizedPoints(points_005)
-    pointsraw = torch.tensor(sizedpointsraw_005).view(-1, 2).tolist()#画框内的全部锚点
-    pointsraw1 = torch.tensor(sizedpointsraw_005).view(-1, 2).tolist()#画框内的全部锚点，用于计计算框最中间的点
-    sizedpoints = torch.tensor(sizedpointsraw_05).view(-1, 2).tolist()
-
-    img_raw = Image.open(Image_path).convert('L').resize((Display_width, Display_height), Image.LANCZOS)
-    img_array = np.array(img_raw)
-
-    # 为所有点遍历(置信度大于0.05)
-    for i in range(len(pointsraw)):
-        pnum = 0
-        if pointsraw[i] in selectedp_list:
-            #print("point selected,continue")
-            continue
-        if(pointsraw[i][0]>=640):
-            pointsraw[i][0]=639
-        if(pointsraw[i][1]>=640):
-            pointsraw[i][1]=639
-        #print(pointsraw[i][0],pointsraw[i][1])
-        currentpoint_pixel = img_array[pointsraw[i][1]][pointsraw[i][0]]#---注意翻一下横纵坐标
-        if(currentpoint_pixel<max_pixel//2):
-            #print("point's pixel likes background,continue ","该点的像素值:",currentpoint_pixel," 目标参考像素值max_pixel//2：",max_pixel//2)
-            continue
-        for point1 in sizedpoints:#计算以点i为中心，画框范围内的的目前点个数（大于1说明该物体已被计数，不用重复计数）
-            if int(point1[0]) > pointsraw[i][0] - x_len // 2 and int(point1[0]) < pointsraw[i][0] + x_len // 2 \
-                    and int(point1[1]) > pointsraw[i][1] - y_len // 2 and int(point1[1]) < pointsraw[i][1] + y_len // 2:
-                #print(point1)
-                pnum = pnum + 1
-        if pnum == 0:
-            #print("该框中无预测点，选择目前点为预测点（以目前点画的框，已在框的中间）")
-            n_x_min = pointsraw[i][0] - x_len // 2;
-            n_x_max = pointsraw[i][0] + x_len // 2
-            n_y_min = pointsraw[i][1] - y_len // 2;
-            n_y_max = pointsraw[i][1] + y_len // 2
-            crop_area = (n_x_min, n_y_min, n_x_max, n_y_max)
-            crop_img = Input_Image.copy().crop(crop_area)
-            crop_img = crop_img.convert('L')  # 转换成灰度图
-            if crop_img_base.size != crop_img.size:
-                crop_img = crop_img.resize((crop_img_base.size[0], crop_img_base.size[1]), Image.LANCZOS)
-            s_score = ssim(crop_img, crop_img_base)
-            # plt.imshow(crop_img)
-            # plt.show()  # 显示图片
-            if s_score < 0.5:
-                #print("图像ssim相似度:", s_score," 跳过")
-                continue
-            #print("图像ssim相似度:", s_score, " 不跳过")
-
-            # 选择框内最中间的点
-            for j in range(len(pointsraw1)):#选择框内最中间的点,并把 框内所有 点加入队列，防止重复
-                if int(pointsraw1[j][0]) > n_x_min and int(pointsraw1[j][0]) < n_x_max \
-                        and int(pointsraw1[j][1]) > n_y_min and int(pointsraw1[j][1]) < n_y_max:
-                        #and pointsraw[i] not in selectedp_list:
-                    #print("加入selected",pointsraw1[j])
-                    selectedp_list.append(pointsraw1[j])
-
-            sizedpoints.append(pointsraw[i])
-            add_points.append(pointsraw[i])
-            #print(pointsraw1[sindex],'==：',pointsraw[i])
-            #print('self.sizedpoints_+：',len(sizedpoints))
-            img_n = img_n.resize((Display_width,Display_height), Image.LANCZOS)
-            img_n = DrawPointi(pointsraw,i,img_n)
-        else:
-            #print("point not only in box,continue")
-            continue
-
-    print("initial_count:",len(points_05)," gt_count:",gt_count)
-    print("current_count:",len(sizedpoints))
-    # plt.imshow(img_n)
-    # plt.show()  # 显示图片
-    return int(gt_count),int(len(points_05)),int(len(sizedpoints)),sizedpoints
 
 
 def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,scores_005, current_points,current_scores,
@@ -670,7 +499,7 @@ def interactive_adaptation_boxs_del_all(img_n, EXEMPLAR_BBX, Image_path, points_
     draw.rectangle(EXEMPLAR_BBX, outline='white', width=2)
     return img_n, len(current_points_copy), current_points_copy,current_scores_copy
 
-def HungarianMatch(p_gt,p_prd,threshold=0.25):
+def HungarianMatch(p_gt,p_prd,threshold=0.5):
     cost_martix_nap = []
     tree = KDTree(p_gt)  # 全部预测的点构建树
     for b in p_gt:
@@ -699,236 +528,6 @@ def pointF1_score(TP,p_gt,p_prd):
     F1s = 2*(Precision*Recell)/(Precision+Recell)
     return F1s, Precision, Recell
 
-def dataplot_v3_drawbox_3_3(inf,model,device,transform,root_path):
-    root_path = root_path
-    # root_path = "/mnt/disk3/zrj/MyDatas/CELLSsplit_v4/DATA_ROOT/test"#有gt 43090
-    Display_width = 640
-    Display_height = 640
-    # if log_path:
-    #     with open(log_path, "r") as f:
-    #         interinf = f.readlines()
-    #         for inf in interinf:
-    print(inf)#得到box坐标，图片名称
-    ind_box_add = inf.find("#sized_box_add")
-    boxs_area_add = inf[ind_box_add:].split("[(")[1].split(")]")[0].split("), (")
-    ind_box_del = inf.find("#sized_box_del")
-    boxs_area_del = inf[ind_box_del:].split("[(")[1].split(")]")[0].split("), (")
-    img_name = inf.split("images/")[1].split("#")[0]
-    #print(img_name)
-    Image_path = root_path+"/images/"+img_name
-    img_raw = Image.open(Image_path).convert('RGB')
-    W, H = img_raw.size
-    img_n = Image.fromarray(np.uint8(img_raw))
-
-    #img_raw = Image.open(Image_path).convert('RGB')
-    width, height = img_raw.size
-    new_width = width // 128 * 128
-    new_height = height // 128 * 128
-    img_raw = img_raw.resize((new_width, new_height), Image.LANCZOS)
-    # pre-proccessing
-    img = transform(img_raw)
-    samples = torch.Tensor(img).unsqueeze(0)
-    samples = samples.to(device)  # print(samples.shape)
-    # run inference
-    threshold = 0.5
-    outputs, simifeat = model(samples)  # 原文是outputs = model(samples)，但改了p2pnet的forward的return
-    outputs_points = outputs['pred_points'][0]
-    outputs_scores = torch.nn.functional.softmax(outputs['pred_logits'], -1)[:, :, 1][0]  # [:, :, 1][0]为错误点的概率
-    points_05 = outputs_points[outputs_scores > threshold].detach().cpu().numpy().tolist()
-    points_005 = outputs_points[outputs_scores > 0.05].detach().cpu().numpy().tolist()
-    scores_05 = outputs_scores[outputs_scores > 0.5].detach().cpu().numpy().tolist()
-    scores_005 = outputs_scores[outputs_scores > 0.05].detach().cpu().numpy().tolist()
-
-    img_ini = DrawfPoints(points_05, Image_path)
-    img_ini = Image.fromarray(np.uint8(img_ini))
-    predict_cnt = len(points_05)
-    print(predict_cnt)
-    #坐标还原原图尺寸
-    print(boxs_area_add)
-    print(boxs_area_del)
-    EXEMPLAR_BBX_ori_add_list = []
-    EXEMPLAR_BBX_ori_del_list = []
-    for i in range(len(boxs_area_add)):
-        box_area_add = boxs_area_add[i].split(", ")
-        EXEMPLAR_BBX_ori_add = (
-        int(box_area_add[0].strip()) , int(box_area_add[1].strip()),
-        int(box_area_add[2].strip()) , int(box_area_add[3].strip()))
-        EXEMPLAR_BBX_add=(int(box_area_add[0].strip())*W/Display_width,int(box_area_add[1].strip())*W/Display_width,
-                      int(box_area_add[2].strip())*H/Display_height,int(box_area_add[3].strip())*H/Display_height)
-        #print(EXEMPLAR_BBX_add)
-        EXEMPLAR_BBX_ori_add_list.append(EXEMPLAR_BBX_ori_add)
-
-        box_area_del = boxs_area_del[i].split(", ")
-        EXEMPLAR_BBX_ori_del = (
-            int(box_area_del[0].strip()), int(box_area_del[1].strip()),
-            int(box_area_del[2].strip()), int(box_area_del[3].strip()))
-        EXEMPLAR_BBX_del = (
-        int(box_area_del[0].strip()) * W / Display_width, int(box_area_del[1].strip()) * W / Display_width,
-        int(box_area_del[2].strip()) * H / Display_height,int(box_area_del[3].strip()) * H / Display_height)
-        #print(EXEMPLAR_BBX_del)
-        EXEMPLAR_BBX_ori_del_list.append(EXEMPLAR_BBX_ori_del)
-
-        # draw = ImageDraw.Draw(img_n)
-        # draw.rectangle(EXEMPLAR_BBX_add, outline='red', width=2)
-        # draw.rectangle(EXEMPLAR_BBX_del, outline='white', width=2)
-    # plt.imshow(img_n)
-    # plt.show()  # 显示图片
-    #break
-
-    #得到gt的点坐标，不只是count
-    gt_path_root = root_path + "/test_file"
-    gt_path = gt_path_root + "/" + img_name.split('.')[0] + ".txt"
-    with open(gt_path, 'r') as f:
-        points = f.readlines()
-        # print(points)
-        p_gt = [[int(point.split(" ")[0]), int(point.split(" ")[1].strip())] for point in
-                points]
-        #print("len(p_gt):", len(p_gt), p_gt)
-    return EXEMPLAR_BBX_ori_add_list,EXEMPLAR_BBX_ori_del_list,points_05,points_005,scores_05,scores_005,p_gt,\
-           img_ini,Image_path,Display_width,Display_height,new_width,new_height
-
-def sixbox_F1(log_path,root_path):#模拟交互，3次加点，3次删除重复点
-    #log_path = "/mnt/disk3/zrj/PICACount/interact_box_log_Cellsplitv4lastb4e6交互_box33.txt"#43090
-    log_path = log_path
-    #root_path = "/media/xd/zrj/Prjs/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v3/DATA_ROOT/test"
-    model, device, transform, args = p2p_init_visual_counter()
-    ssim_t = args.ssim_t
-    def ReSizedPoints(points):
-        resizedpoints = []
-        data = points
-        llen = len(data)
-        for i in range(llen):
-            x = round(int(data[i][0]) * Image_Ori_W // Display_width)
-            y = round(int(data[i][1]) * Image_Ori_H // Display_height)
-            resizedpoints.append((x, y))
-            # print(int(data[i][0]),int(data[i][1]),"__",x,y)
-        return resizedpoints
-
-    maes_ori, mses_ori = [], []
-    m_F1point_scores_ori, m_Precision_scores_ori, m_Recall_scores_ori = [], [], []
-
-    # 使用列表创建三个子列表
-    m_F1point_scores_cur = [[] for _ in range(3)]
-    m_Precision_scores_cur = [[] for _ in range(3)]
-    m_Recall_scores_cur = [[] for _ in range(3)]
-    maes_cur = [[] for _ in range(3)]
-    mses_cur = [[] for _ in range(3)]
-    if log_path:
-        with open(log_path, "r") as f:
-            interinf = f.readlines()
-            for inf in interinf:
-                EXEMPLAR_BBX_ori_add_list, EXEMPLAR_BBX_ori_del_list, points_05,points_005,scores_05,scores_005,p_gt,\
-                img_n,Image_path,Display_width,Display_height,Image_Ori_W, Image_Ori_H \
-                    =  dataplot_v3_drawbox_3_3(inf, model, device, transform,root_path)
-
-                print(Image_path,EXEMPLAR_BBX_ori_add_list, EXEMPLAR_BBX_ori_del_list)
-                print("points_05,points_005,p_gt ",len(points_05),len(points_005),len(p_gt))
-                gt_count = len(p_gt)
-                def SizedPoints(points):
-                    sizedpoints = []
-                    data = points
-                    llen = len(data)
-                    for i in range(llen):
-                        x = round(int(data[i][0]) * Display_width // Image_Ori_W)
-                        y = round(int(data[i][1]) * Display_height // Image_Ori_H)
-                        sizedpoints.append((x, y))
-                        # print(int(data[i][0]),int(data[i][1]),"__",x,y)
-                    return sizedpoints
-                sizedpointsraw_05 = SizedPoints(points_05)
-                sizedpoints = torch.tensor(sizedpointsraw_05).view(-1, 2).tolist()
-                current_points = sizedpoints
-                current_scores = scores_05
-                initial_count = len(sizedpoints)
-                threshold = 0.5
-                # threshold = 10#无knn
-                TP = HungarianMatch(p_gt, points_05,threshold)
-
-                F1point_score_ori, Precision_score_ori, Recall_score_ori = pointF1_score(TP, p_gt, points_05)
-                maes_ori.append(abs(initial_count - gt_count))
-                mses_ori.append(abs(initial_count - gt_count) ** 2)
-                for i in range(len(EXEMPLAR_BBX_ori_add_list)):
-                    img_n, current_count, current_points,current_scores \
-                        = interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX_ori_add_list[i],
-                                                         Image_path, points_005,scores_005,current_points,current_scores,
-                                                         Display_width, Display_height,
-                                                         Image_Ori_W, Image_Ori_H,
-                                                         ssim_t)
-                    print("initial_count, add_current_count:", initial_count, current_count)
-                    img_n, current_count, current_points,current_scores \
-                        = interactive_adaptation_boxs_del(img_n, EXEMPLAR_BBX_ori_del_list[i],
-                                                          Image_path, points_005,scores_005, current_points,current_scores,
-                                                          Display_width, Display_height,
-                                                          Image_Ori_W, Image_Ori_H,
-                                                          ssim_t)
-                    print("initial_count, del_current_count:", initial_count, current_count)
-
-                    maes_cur[i].append(abs(current_count - gt_count))
-                    mses_cur[i].append(abs(current_count - gt_count) ** 2)
-
-                    resizedpoints = ReSizedPoints(current_points)
-                    TP = HungarianMatch(p_gt, resizedpoints,threshold)
-                    F1point_score_cur, Precision_score_cur, Recall_score_cur = pointF1_score(TP, p_gt, resizedpoints,
-                                                                                            )
-                    print("F1point_score_ori{},F1point_score_cur{}:{}".format(F1point_score_ori,i,F1point_score_cur))
-                    m_F1point_scores_cur[i].append(F1point_score_cur)
-                    m_Precision_scores_cur[i].append(Precision_score_cur)
-                    m_Recall_scores_cur[i].append(Recall_score_cur)
-                    # plt.imshow(img_n)
-                    # plt.show()  # 显示图片
-                m_F1point_scores_ori.append(F1point_score_ori)
-                m_Precision_scores_ori.append(Precision_score_ori)
-                m_Recall_scores_ori.append(Recall_score_ori)
-                #m_F1point_scores_cur.append(F1point_score_cur)
-                #break
-
-            # 计算原始分数的均值并打印
-            m_F1point_score_ori = np.mean(m_F1point_scores_ori)
-            m_Precision_score_ori = np.mean(m_Precision_scores_ori)
-            m_Recall_score_ori = np.mean(m_Recall_scores_ori)
-            mae_ori = np.mean(maes_ori)
-            mse_ori = np.mean(mses_ori)
-            rmse_ori = np.sqrt(mse_ori)
-            print(f"m_F1point_score_ori: {m_F1point_score_ori}")
-            print(f"m_Precision_score_ori: {m_Precision_score_ori}")
-            print(f"m_Recall_score_ori: {m_Recall_score_ori}")
-            print(f"mae_ori: {mae_ori}, mse_ori: {mse_ori}, rmse_ori: {rmse_ori}")
-            # 打印当前分数的均值
-            for i, (f1, precision, recall) in enumerate(
-                    zip(m_F1point_scores_cur, m_Precision_scores_cur, m_Recall_scores_cur)):
-                print(f"m_F1point_score_cur{i}: {np.mean(f1)}")
-                print(f"m_Precision_score_cur{i}: {np.mean(precision)}")
-                print(f"m_Recall_score_cur{i}: {np.mean(recall)}")
-            # 打印当前 MAE 和 MSE 的均值
-            for i, (mae, mse) in enumerate(zip(maes_cur, mses_cur)):
-                print(f"maes_cur{i}: {np.mean(mae)}")
-                print(f"mses_cur{i}: {np.mean(mse)}")
-                print(f"rmses_cur{i}: {np.sqrt(np.mean(mse))}")
-            # 记录日志
-            run_log_path = "MAE_MSE_F1_P_R_scores_box33.txt"
-            with open(run_log_path, "a") as log_file:
-                log_file.write(f'\nEval Log {time.strftime("%c")}\n')
-                log_file.write(f"{args}\n")
-                log_file.write(f"m_F1point_score_ori: {m_F1point_score_ori}\n")
-                log_file.write(f"m_Precision_score_ori: {m_Precision_score_ori}\n")
-                log_file.write(f"m_Recall_score_ori: {m_Recall_score_ori}\n")
-                log_file.write(f"mae_ori: {mae_ori}, mse_ori: {mse_ori}, rmse_ori: {rmse_ori}\n")
-                # 记录当前分数的均值
-                for i, (f1, precision, recall) in enumerate(
-                        zip(m_F1point_scores_cur, m_Precision_scores_cur, m_Recall_scores_cur)):
-                    log_file.write(f"m_F1point_score_cur{i}: {np.mean(f1)}\n")
-                    log_file.write(f"m_Precision_score_cur{i}: {np.mean(precision)}\n")
-                    log_file.write(f"m_Recall_score_cur{i}: {np.mean(recall)}\n")
-                # 记录当前 MAE 和 MSE 的均值
-                for i, (mae, mse) in enumerate(zip(maes_cur, mses_cur)):
-                    log_file.write(f"maes_cur{i}: {np.mean(mae)}\n")
-                    log_file.write(f"mses_cur{i}: {np.mean(mse)}\n")
-                    log_file.write(f"rmses_cur{i}: {np.sqrt(np.mean(mse))}\n")
-
-                log_file.write(f"num of img: {len(interinf)}\n")
-                log_file.write(f"num of img: {len(interinf)}, confidence_t: {threshold}, ssim_t: {ssim_t}\n")
-
-                log_file.write(f"num of del_re_times: {len(del_re_time)}, max_time: {np.max(del_re_time)}, mean_time: {np.mean(del_re_time)}\n")
-                log_file.write(f"num of add_times: {len(add_time)}, max_time: {np.max(add_time)}, mean_time: {np.mean(add_time)}\n")#
 
 def adaptation_boxes(inf,model,device,transform,root_path,ssim_t):
     #root_path = "/media/xdu/Data/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_64/DATA_ROOT/testval"  # 有gt 134
@@ -1115,7 +714,7 @@ def adaptation_boxes(inf,model,device,transform,root_path,ssim_t):
     print("F1point_score_cur{},Precision_score_cur{},Recall_score_cur{}".format(F1point_score_cur,Precision_score_cur,Recall_score_cur))
     return mae_ori,mse_ori,F1point_score_ori,Precision_score_ori,Recall_score_ori,mae_cur,mse_cur,F1point_score_cur,Precision_score_cur,Recall_score_cur
 
-def boxes_F1(log_path,root_path):#用户真实交互，有三种交互，0-2次
+def threeboxes_simulation(log_path,root_path):#用户真实交互，有三种交互，0-2次
     model, device, transform,args = p2p_init_visual_counter()
     ssim_t = args.ssim_t
     maes_ori, mses_ori = [], []
@@ -1219,10 +818,10 @@ def get_args_parser():
     # * Backbone
     parser.add_argument('--backbone', default='vgg16_bn', type=str,
                         help="name of the convolutional backbone to use")
-    parser.add_argument('--weight_path', default='/mnt/data/zrj/Mymodel/NEFCell_best_e20.pth',
-                        help='path where the trained weights saved')  # 43090
-    # parser.add_argument('--weight_path', default='/mnt/data/zrj/Mymodel/NEFCell_best_e1500.pth',
+    # parser.add_argument('--weight_path', default='/mnt/data/zrj/Mymodel/NEFCell_best_e20.pth',
     #                     help='path where the trained weights saved')  # 43090
+    parser.add_argument('--weight_path', default='/mnt/data/zrj/Mymodel/NEFCell_best_e1500.pth',
+                        help='path where the trained weights saved')  # 43090
     parser.add_argument('--row', default=2, type=int,
                         help="row number of anchor points")
     parser.add_argument('--line', default=2, type=int,
@@ -1234,15 +833,10 @@ def get_args_parser():
 
     return parser
 def main(args):
-    # 与交互式计数方法对比,初始预测模型选择训练20个epoch的
-    log_path = "/mnt/data/zrj/prj/AICC/interact_box_log_test192_box33.txt"  # 43090
+    #与非交互式计数方法对比,初始预测模型选择训练1500个epoch的
+    log_path = '/mnt/data/zrj/prj/AICC/interact_box_log_test192.txt'
     root_path = '/mnt/data/zrj/Mydata/NEFCell/DATA_ROOT/test'  # 43090
-    sixbox_F1(log_path, root_path)
-
-    # #与非交互式计数方法对比,初始预测模型选择训练1500个epoch的
-    # log_path = '/mnt/data/zrj/prj/AICC/interact_box_log_test192.txt'
-    # root_path = '/mnt/data/zrj/Mydata/NEFCell/DATA_ROOT/test'  # 43090
-    # boxes_F1(log_path, root_path)
+    threeboxes_simulation(log_path, root_path)
 
 
 if __name__ == '__main__':
