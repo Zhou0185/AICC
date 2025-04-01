@@ -8,9 +8,9 @@
 
 ## NSC-34 EdU Fluorescence Cell Dataset (NEFCell) and Checkpoints
 
-Get NEFCel and Checkpoints from https://drive.google.com/drive/folders/1vFn8KNNYYFpLjFZXTxO5qAMS4ar64XJJ?usp=sharing
+Get NEFCell Dataset and Checkpoints from [NEFCell](https://drive.google.com/drive/folders/1vFn8KNNYYFpLjFZXTxO5qAMS4ar64XJJ?usp=sharing)
 
-The Data folder should be organized as follows:
+The Data folder is organized as follows:
 - 📂 **Data**
   - 📂 **NEFCell**
     - 📂 **DATA_ROOT**
@@ -21,12 +21,14 @@ The Data folder should be organized as follows:
       - 📂 **testval**
       - 📂 **test**
 
-The Checkpoints folder should be organized as follows:
+The Checkpoints folder is organized as follows:
 - 📂 **Checkpoints**
   - 📂 **e1500**
     - 📄 NEFCell_p2p_best_e1500.pth
   - 📂 **e20**
     - 📄 NEFCell_p2p_best_e20.pth
+
+The training steps  refer to [P2PNet](https://github.com/TencentYoutuResearch/CrowdCounting-P2PNet)
 
 ## Environment set up
 ```
