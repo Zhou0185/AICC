@@ -1,0 +1,192 @@
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_111.tif initial_count:35 gt_count:36#sized_box_add:(218, 567, 254, 597)#current_cnt_add:36
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_112.tif initial_count:51 gt_count:51
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_113.tif initial_count:52 gt_count:50
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_114.tif initial_count:73 gt_count:71#sized_box_del_re:(486, 355, 517, 387)#current_cnt_del_re:72
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_121.tif initial_count:40 gt_count:41
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_122.tif initial_count:41 gt_count:38#sized_box_del_re:(550, 441, 589, 476)#current_cnt_del_re:40#sized_box_del_all:(564, 481, 592, 506)#current_cnt_del_all:39
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_123.tif initial_count:45 gt_count:44#sized_box_del_re:(481, 332, 514, 351)#current_cnt_del_re:44
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_124.tif initial_count:39 gt_count:39
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_131.tif initial_count:62 gt_count:58#sized_box_del_re:(610, 82, 639, 114)#current_cnt_del_re:57
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_132.tif initial_count:39 gt_count:39
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_133.tif initial_count:53 gt_count:50#sized_box_del_re:(570, 98, 594, 127)#current_cnt_del_re:52
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_134.tif initial_count:50 gt_count:43#sized_box_del_re:(45, 480, 85, 525)#current_cnt_del_re:44
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_141.tif initial_count:76 gt_count:65#sized_box_del_re:(506, 608, 535, 631)#current_cnt_del_re:70
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_142.tif initial_count:50 gt_count:45#sized_box_del_re:(254, 135, 287, 165)#current_cnt_del_re:47#sized_box_del_all:(542, 498, 568, 526)#current_cnt_del_all:46
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_143.tif initial_count:51 gt_count:44#sized_box_del_re:(194, 295, 219, 315)#current_cnt_del_re:50
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_144.tif initial_count:56 gt_count:48#sized_box_del_re:(406, 283, 442, 316)#current_cnt_del_re:52
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_211.tif initial_count:174 gt_count:191#sized_box_add:(169, 529, 203, 557)#current_cnt_add:182#sized_box_add:(143, 550, 176, 583)#current_cnt_add:183
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_212.tif initial_count:183 gt_count:185
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_213.tif initial_count:158 gt_count:150
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_214.tif initial_count:124 gt_count:125#sized_box_add:(271, 574, 311, 617)#current_cnt_add:126
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_221.tif initial_count:204 gt_count:203
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_222.tif initial_count:179 gt_count:175#sized_box_del_re:(515, 463, 535, 484)#current_cnt_del_re:168#sized_box_add:(424, 71, 447, 94)#current_cnt_add:176
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_223.tif initial_count:162 gt_count:164#sized_box_add:(317, 89, 347, 120)#current_cnt_add:173#sized_box_del_re:(613, 599, 634, 621)#current_cnt_del_re:168#sized_box_del_re:(223, 284, 246, 318)#current_cnt_del_re:163
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_224.tif initial_count:159 gt_count:151#sized_box_del_re:(518, 375, 536, 394)#current_cnt_del_re:151
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_231.tif initial_count:185 gt_count:175#sized_box_del_re:(433, 49, 457, 83)#current_cnt_del_re:170
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_232.tif initial_count:177 gt_count:169#sized_box_del_re:(442, 607, 465, 630)#current_cnt_del_re:168
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_233.tif initial_count:154 gt_count:150#sized_box_del_re:(269, 184, 291, 211)#current_cnt_del_re:147
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_234.tif initial_count:168 gt_count:169#sized_box_add:(503, 401, 531, 428)#current_cnt_add:169
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_241.tif initial_count:216 gt_count:200#sized_box_del_re:(101, 400, 120, 423)#current_cnt_del_re:205#sized_box_del_re:(12, 490, 29, 506)#current_cnt_del_re:204
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_242.tif initial_count:183 gt_count:180#sized_box_del_re:(234, 60, 252, 79)#current_cnt_del_re:179
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_243.tif initial_count:148 gt_count:152#sized_box_del_re:(101, 25, 123, 47)#current_cnt_del_re:144
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_244.tif initial_count:132 gt_count:134
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_311.tif initial_count:129 gt_count:96#sized_box_del_all:(321, 296, 343, 319)#current_cnt_del_all:61#sized_box_add:(576, 503, 600, 529)#current_cnt_add:64
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_312.tif initial_count:155 gt_count:152
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_313.tif initial_count:143 gt_count:140#sized_box_del_re:(564, 50, 585, 74)#current_cnt_del_re:137
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_314.tif initial_count:122 gt_count:125#sized_box_del_re:(153, 103, 173, 122)#current_cnt_del_re:120#sized_box_del_re:(492, 313, 514, 337)#current_cnt_del_re:119
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_321.tif initial_count:184 gt_count:181
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_322.tif initial_count:166 gt_count:171#sized_box_add:(428, 564, 454, 585)#current_cnt_add:171#sized_box_del_re:(126, 471, 147, 495)#current_cnt_del_re:169
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_323.tif initial_count:159 gt_count:162#sized_box_add:(612, 0, 636, 15)#current_cnt_add:168#sized_box_del_re:(12, 312, 38, 335)#current_cnt_del_re:162
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_324.tif initial_count:147 gt_count:150
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_331.tif initial_count:170 gt_count:172#sized_box_add:(482, 1, 515, 22)#current_cnt_add:182#sized_box_del_re:(396, 322, 423, 346)#current_cnt_del_re:178#sized_box_del_re:(256, 221, 289, 252)#current_cnt_del_re:171
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_332.tif initial_count:166 gt_count:169#sized_box_add:(227, 1, 253, 16)#current_cnt_add:175#sized_box_del_re:(572, 526, 599, 553)#current_cnt_del_re:168
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_333.tif initial_count:151 gt_count:148#sized_box_del_re:(313, 316, 334, 340)#current_cnt_del_re:145
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_334.tif initial_count:160 gt_count:149#sized_box_del_re:(80, 446, 104, 471)#current_cnt_del_re:158#sized_box_del_re:(592, 114, 613, 143)#current_cnt_del_re:156#sized_box_del_re:(467, 461, 492, 490)#current_cnt_del_re:153
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_341.tif initial_count:197 gt_count:194#sized_box_del_re:(282, 7, 310, 39)#current_cnt_del_re:193
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_342.tif initial_count:183 gt_count:169#sized_box_del_re:(240, 16, 262, 39)#current_cnt_del_re:181#sized_box_del_re:(361, 499, 383, 521)#current_cnt_del_re:175#sized_box_del_re:(145, 571, 170, 599)#current_cnt_del_re:171
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_343.tif initial_count:138 gt_count:131#sized_box_del_re:(160, 259, 189, 287)#current_cnt_del_re:133#sized_box_del_re:(594, 106, 622, 139)#current_cnt_del_re:131
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_344.tif initial_count:118 gt_count:111#sized_box_del_re:(481, 393, 506, 425)#current_cnt_del_re:117#sized_box_del_re:(580, 344, 607, 372)#current_cnt_del_re:115
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_411.tif initial_count:51 gt_count:63#sized_box_add:(312, 27, 349, 61)#current_cnt_add:57
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_412.tif initial_count:108 gt_count:112#sized_box_add:(192, 408, 230, 448)#current_cnt_add:116#sized_box_del_re:(270, 384, 299, 414)#current_cnt_del_re:110
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_413.tif initial_count:108 gt_count:110#sized_box_add:(623, 465, 643, 498)#current_cnt_add:112#sized_box_del_re:(144, 586, 180, 622)#current_cnt_del_re:110
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_414.tif initial_count:108 gt_count:110#sized_box_del_re:(125, 523, 146, 545)#current_cnt_del_re:106
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_421.tif initial_count:66 gt_count:70#sized_box_add:(626, 478, 646, 513)#current_cnt_add:67
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_422.tif initial_count:107 gt_count:113#sized_box_add:(2, 324, 27, 354)#current_cnt_add:110
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_423.tif initial_count:106 gt_count:107#sized_box_add:(472, 56, 497, 83)#current_cnt_add:109#sized_box_del_re:(24, 57, 60, 90)#current_cnt_del_re:106
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_424.tif initial_count:77 gt_count:71#sized_box_del_re:(525, 17, 548, 44)#current_cnt_del_re:73
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_431.tif initial_count:52 gt_count:50
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_432.tif initial_count:82 gt_count:78#sized_box_del_re:(463, 100, 485, 131)#current_cnt_del_re:78
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_433.tif initial_count:85 gt_count:76#sized_box_del_re:(433, 54, 462, 88)#current_cnt_del_re:77#sized_box_del_re:(418, 522, 438, 547)#current_cnt_del_re:75
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_434.tif initial_count:83 gt_count:73#sized_box_del_re:(244, 572, 269, 598)#current_cnt_del_re:79
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_441.tif initial_count:32 gt_count:31#sized_box_del_all:(484, 298, 512, 333)#current_cnt_del_all:30
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_442.tif initial_count:58 gt_count:60#sized_box_add:(408, 622, 434, 643)#current_cnt_add:63#sized_box_del_re:(92, 432, 117, 459)#current_cnt_del_re:62
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_443.tif initial_count:63 gt_count:59#sized_box_del_re:(371, 482, 397, 511)#current_cnt_del_re:60
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_444.tif initial_count:63 gt_count:64#sized_box_del_re:(322, 443, 350, 475)#current_cnt_del_re:60
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_511.tif initial_count:28 gt_count:36#sized_box_add:(228, 318, 266, 357)#current_cnt_add:41
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_512.tif initial_count:65 gt_count:63#sized_box_del_re:(349, 512, 382, 549)#current_cnt_del_re:64#sized_box_del_re:(400, 306, 425, 335)#current_cnt_del_re:63
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_513.tif initial_count:82 gt_count:78#sized_box_del_re:(583, 29, 607, 53)#current_cnt_del_re:80#sized_box_del_re:(333, 581, 355, 605)#current_cnt_del_re:79
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_514.tif initial_count:96 gt_count:96#sized_box_add:(219, 542, 253, 577)#current_cnt_add:97#sized_box_del_re:(394, 429, 422, 457)#current_cnt_del_re:95
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_521.tif initial_count:55 gt_count:49
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_522.tif initial_count:92 gt_count:85#sized_box_del_re:(228, 374, 262, 401)#current_cnt_del_re:91#sized_box_del_re:(538, 289, 565, 322)#current_cnt_del_re:89
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_523.tif initial_count:103 gt_count:100#sized_box_del_re:(476, 380, 506, 408)#current_cnt_del_re:101#sized_box_del_re:(173, 400, 194, 422)#current_cnt_del_re:100
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_524.tif initial_count:70 gt_count:68#sized_box_del_re:(204, 608, 232, 636)#current_cnt_del_re:69#sized_box_del_re:(406, 164, 431, 193)#current_cnt_del_re:65
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_531.tif initial_count:31 gt_count:37
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_532.tif initial_count:77 gt_count:72#sized_box_del_re:(26, 326, 58, 356)#current_cnt_del_re:74
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_533.tif initial_count:72 gt_count:74
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_534.tif initial_count:75 gt_count:75#sized_box_del_re:(125, 566, 153, 594)#current_cnt_del_re:74
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_541.tif initial_count:31 gt_count:31#sized_box_del_re:(327, 446, 350, 477)#current_cnt_del_re:30
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_542.tif initial_count:60 gt_count:59
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_543.tif initial_count:64 gt_count:56#sized_box_del_re:(216, 358, 247, 389)#current_cnt_del_re:62#sized_box_del_re:(476, 116, 505, 142)#current_cnt_del_re:61
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_544.tif initial_count:61 gt_count:66
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_611.tif initial_count:103 gt_count:110#sized_box_add:(624, 340, 644, 364)#current_cnt_add:115#sized_box_del_re:(393, 215, 422, 243)#current_cnt_del_re:107
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_612.tif initial_count:111 gt_count:111
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_613.tif initial_count:73 gt_count:76#sized_box_add:(349, 620, 376, 641)#current_cnt_add:74
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_614.tif initial_count:78 gt_count:76#sized_box_del_re:(242, 531, 268, 564)#current_cnt_del_re:74#sized_box_add:(613, 155, 637, 185)#current_cnt_add:76
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_621.tif initial_count:97 gt_count:99#sized_box_del_re:(143, 442, 171, 466)#current_cnt_del_re:95
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_622.tif initial_count:89 gt_count:96#sized_box_add:(201, 523, 227, 554)#current_cnt_add:93
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_623.tif initial_count:89 gt_count:91#sized_box_add:(291, 318, 326, 359)#current_cnt_add:90
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_624.tif initial_count:74 gt_count:76#sized_box_add:(624, 314, 642, 337)#current_cnt_add:79#sized_box_del_re:(384, 85, 411, 118)#current_cnt_del_re:74
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_631.tif initial_count:101 gt_count:104#sized_box_add:(596, 81, 623, 110)#current_cnt_add:102
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_632.tif initial_count:110 gt_count:115#sized_box_add:(522, 423, 555, 455)#current_cnt_add:112
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_633.tif initial_count:87 gt_count:89#sized_box_del_re:(33, 176, 59, 204)#current_cnt_del_re:85
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_634.tif initial_count:91 gt_count:87#sized_box_del_re:(246, 379, 274, 416)#current_cnt_del_re:82
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_641.tif initial_count:101 gt_count:100#sized_box_del_re:(278, 230, 301, 260)#current_cnt_del_re:98
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_642.tif initial_count:100 gt_count:100#sized_box_add:(623, 348, 642, 378)#current_cnt_add:103#sized_box_del_re:(41, 539, 66, 566)#current_cnt_del_re:99
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_643.tif initial_count:92 gt_count:86#sized_box_del_re:(52, 122, 81, 145)#current_cnt_del_re:85
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_644.tif initial_count:87 gt_count:83#sized_box_del_re:(445, 109, 475, 140)#current_cnt_del_re:83
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_711.tif initial_count:41 gt_count:42
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_712.tif initial_count:50 gt_count:44#sized_box_add:(23, 204, 51, 226)#current_cnt_add:52#sized_box_del_re:(203, 162, 237, 197)#current_cnt_del_re:49#sized_box_del_all:(306, 26, 339, 60)#current_cnt_del_all:43
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_713.tif initial_count:33 gt_count:30
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_714.tif initial_count:41 gt_count:33#sized_box_del_re:(383, 390, 410, 422)#current_cnt_del_re:35#sized_box_del_re:(480, 202, 528, 248)#current_cnt_del_re:34
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_721.tif initial_count:65 gt_count:76#sized_box_del_re:(26, 197, 56, 224)#current_cnt_del_re:70#sized_box_del_re:(376, 84, 399, 104)#current_cnt_del_re:69
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_722.tif initial_count:68 gt_count:66
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_723.tif initial_count:65 gt_count:53#sized_box_del_all:(367, 235, 407, 283)#current_cnt_del_all:43
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_724.tif initial_count:57 gt_count:52#sized_box_del_re:(558, 474, 590, 509)#current_cnt_del_re:60#sized_box_del_re:(180, 29, 212, 59)#current_cnt_del_re:57
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_731.tif initial_count:98 gt_count:99
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_732.tif initial_count:108 gt_count:110
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_733.tif initial_count:88 gt_count:87#sized_box_del_re:(155, 361, 185, 390)#current_cnt_del_re:86
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_734.tif initial_count:81 gt_count:85#sized_box_add:(3, 558, 14, 583)#current_cnt_add:83
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_741.tif initial_count:96 gt_count:100
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_742.tif initial_count:104 gt_count:101
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_743.tif initial_count:84 gt_count:89#sized_box_add:(512, 200, 540, 233)#current_cnt_add:93#sized_box_del_re:(517, 68, 542, 94)#current_cnt_del_re:90#sized_box_del_re:(371, 335, 404, 364)#current_cnt_del_re:88
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_744.tif initial_count:77 gt_count:78
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_811.tif initial_count:69 gt_count:84#sized_box_add:(221, 39, 257, 77)#current_cnt_add:81#sized_box_add:(3, 484, 24, 517)#current_cnt_add:85
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_812.tif initial_count:85 gt_count:91#sized_box_add:(620, 198, 641, 232)#current_cnt_add:89
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_813.tif initial_count:98 gt_count:97
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_814.tif initial_count:81 gt_count:82
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_821.tif initial_count:88 gt_count:87#sized_box_del_re:(347, 259, 376, 287)#current_cnt_del_re:87
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_822.tif initial_count:99 gt_count:96#sized_box_del_re:(37, 524, 71, 554)#current_cnt_del_re:96
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_823.tif initial_count:110 gt_count:107#sized_box_del_re:(230, 473, 260, 513)#current_cnt_del_re:104
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_824.tif initial_count:92 gt_count:90#sized_box_del_re:(14, 417, 43, 452)#current_cnt_del_re:88
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_831.tif initial_count:82 gt_count:85#sized_box_add:(160, 460, 209, 509)#current_cnt_add:83#sized_box_del_re:(64, 100, 99, 135)#current_cnt_del_re:79
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_832.tif initial_count:97 gt_count:92#sized_box_del_re:(57, 515, 79, 547)#current_cnt_del_re:89
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_833.tif initial_count:54 gt_count:58#sized_box_add:(290, 541, 322, 577)#current_cnt_add:59
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_834.tif initial_count:80 gt_count:81
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_841.tif initial_count:88 gt_count:86#sized_box_del_re:(405, 417, 441, 461)#current_cnt_del_re:84
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_842.tif initial_count:85 gt_count:82#sized_box_del_re:(582, 498, 612, 530)#current_cnt_del_re:82
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_843.tif initial_count:89 gt_count:76
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_844.tif initial_count:66 gt_count:69#sized_box_add:(320, 33, 387, 101)#current_cnt_add:70
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_911.tif initial_count:55 gt_count:48
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_912.tif initial_count:49 gt_count:61#sized_box_add:(90, 208, 134, 247)#current_cnt_add:53#sized_box_add:(77, 621, 106, 643)#current_cnt_add:54#sized_box_del_re:(551, 305, 575, 326)#current_cnt_del_re:53
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_913.tif initial_count:88 gt_count:87
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_914.tif initial_count:75 gt_count:80#sized_box_del_re:(459, 364, 493, 389)#current_cnt_del_re:72
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_921.tif initial_count:67 gt_count:58#sized_box_del_re:(176, 438, 209, 473)#current_cnt_del_re:57#sized_box_del_re:(520, 483, 556, 523)#current_cnt_del_re:56
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_922.tif initial_count:88 gt_count:83#sized_box_del_re:(256, 284, 287, 313)#current_cnt_del_re:86#sized_box_del_re:(505, 593, 545, 627)#current_cnt_del_re:85#sized_box_del_re:(603, 456, 624, 489)#current_cnt_del_re:84
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_923.tif initial_count:101 gt_count:95#sized_box_del_re:(468, 476, 497, 504)#current_cnt_del_re:96
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_924.tif initial_count:89 gt_count:94#sized_box_del_re:(360, 524, 394, 551)#current_cnt_del_re:88
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_931.tif initial_count:81 gt_count:80
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_932.tif initial_count:87 gt_count:88
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_933.tif initial_count:55 gt_count:60
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_934.tif initial_count:85 gt_count:82#sized_box_add:(151, 145, 185, 179)#current_cnt_add:85#sized_box_del_re:(524, 119, 552, 157)#current_cnt_del_re:84#sized_box_del_re:(216, 83, 240, 108)#current_cnt_del_re:81
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_941.tif initial_count:96 gt_count:93#sized_box_del_re:(136, 119, 170, 154)#current_cnt_del_re:94
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_942.tif initial_count:82 gt_count:83
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_943.tif initial_count:80 gt_count:79
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_944.tif initial_count:61 gt_count:69#sized_box_add:(219, 327, 251, 361)#current_cnt_add:63#sized_box_del_re:(277, 173, 301, 200)#current_cnt_del_re:62
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1011.tif initial_count:99 gt_count:99
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1012.tif initial_count:87 gt_count:89#sized_box_add:(307, 623, 343, 642)#current_cnt_add:88#sized_box_del_re:(183, 284, 220, 320)#current_cnt_del_re:87
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1013.tif initial_count:71 gt_count:72
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1014.tif initial_count:86 gt_count:85#sized_box_del_re:(331, 594, 368, 629)#current_cnt_del_re:82
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1021.tif initial_count:99 gt_count:90#sized_box_del_re:(12, 370, 43, 404)#current_cnt_del_re:97#sized_box_del_re:(353, 576, 381, 612)#current_cnt_del_re:91
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1022.tif initial_count:80 gt_count:81#sized_box_del_re:(53, 126, 80, 149)#current_cnt_del_re:80
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1023.tif initial_count:64 gt_count:67#sized_box_add:(619, 396, 645, 426)#current_cnt_add:67
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1024.tif initial_count:50 gt_count:50
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1031.tif initial_count:80 gt_count:79#sized_box_add:(137, 583, 225, 638)#current_cnt_add:81#sized_box_del_re:(0, 75, 24, 101)#current_cnt_del_re:78
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1032.tif initial_count:57 gt_count:59#sized_box_del_re:(465, 328, 492, 357)#current_cnt_del_re:61
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1033.tif initial_count:38 gt_count:43#sized_box_add:(91, 1, 127, 21)#current_cnt_add:41
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1034.tif initial_count:67 gt_count:65#sized_box_del_re:(386, 131, 419, 180)#current_cnt_del_re:65
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1041.tif initial_count:52 gt_count:51#sized_box_del_re:(70, 474, 96, 498)#current_cnt_del_re:56#sized_box_del_re:(320, 235, 351, 262)#current_cnt_del_re:55
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1042.tif initial_count:41 gt_count:36#sized_box_del_re:(574, 367, 603, 398)#current_cnt_del_re:45#sized_box_del_re:(397, 385, 421, 410)#current_cnt_del_re:42
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1043.tif initial_count:98 gt_count:99#sized_box_add:(435, 2, 489, 45)#current_cnt_add:96
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1044.tif initial_count:57 gt_count:53#sized_box_del_re:(297, 305, 325, 334)#current_cnt_del_re:55#sized_box_del_re:(1, 507, 32, 545)#current_cnt_del_re:52
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1111.tif initial_count:61 gt_count:64#sized_box_del_re:(220, 450, 251, 478)#current_cnt_del_re:59
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1112.tif initial_count:65 gt_count:65#sized_box_del_re:(323, 278, 353, 310)#current_cnt_del_re:64
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1113.tif initial_count:61 gt_count:54#sized_box_del_re:(68, 115, 93, 144)#current_cnt_del_re:58#sized_box_del_re:(514, 31, 542, 67)#current_cnt_del_re:57
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1114.tif initial_count:81 gt_count:76#sized_box_del_re:(505, 375, 538, 410)#current_cnt_del_re:79
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1121.tif initial_count:82 gt_count:84#sized_box_del_re:(7, 561, 37, 590)#current_cnt_del_re:78
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1122.tif initial_count:77 gt_count:76#sized_box_del_re:(604, 62, 640, 106)#current_cnt_del_re:76#sized_box_add:(467, 463, 526, 523)#current_cnt_add:77
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1123.tif initial_count:64 gt_count:68#sized_box_del_re:(158, 33, 191, 61)#current_cnt_del_re:63
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1124.tif initial_count:57 gt_count:51#sized_box_del_all:(313, 444, 342, 474)#current_cnt_del_all:44#sized_box_add:(565, 583, 609, 629)#current_cnt_add:48
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1131.tif initial_count:78 gt_count:77#sized_box_del_re:(97, 43, 128, 71)#current_cnt_del_re:77
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1132.tif initial_count:64 gt_count:59#sized_box_del_re:(568, 102, 606, 147)#current_cnt_del_re:62#sized_box_del_re:(170, 313, 206, 357)#current_cnt_del_re:61
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1133.tif initial_count:41 gt_count:42#sized_box_del_re:(304, 443, 326, 460)#current_cnt_del_re:40
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1134.tif initial_count:63 gt_count:59#sized_box_add:(106, 588, 144, 623)#current_cnt_add:64#sized_box_del_re:(595, 456, 622, 486)#current_cnt_del_re:62
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1141.tif initial_count:60 gt_count:53#sized_box_del_re:(378, 549, 432, 601)#current_cnt_del_re:57
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1142.tif initial_count:52 gt_count:36#sized_box_del_re:(587, 474, 614, 502)#current_cnt_del_re:46#sized_box_del_re:(68, 53, 101, 87)#current_cnt_del_re:44
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1143.tif initial_count:92 gt_count:92
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1144.tif initial_count:53 gt_count:49#sized_box_del_re:(236, 277, 260, 299)#current_cnt_del_re:51
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1211.tif initial_count:98 gt_count:109#sized_box_add:(160, 403, 214, 462)#current_cnt_add:117#sized_box_del_re:(213, 6, 248, 34)#current_cnt_del_re:116#sized_box_del_re:(274, 286, 303, 307)#current_cnt_del_re:114
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1212.tif initial_count:110 gt_count:123#sized_box_add:(252, 250, 300, 307)#current_cnt_add:133#sized_box_del_re:(544, 528, 578, 555)#current_cnt_del_re:128#sized_box_del_re:(560, 266, 589, 298)#current_cnt_del_re:127
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1213.tif initial_count:115 gt_count:143#sized_box_add:(476, 438, 534, 501)#current_cnt_add:137#sized_box_del_re:(455, 16, 486, 48)#current_cnt_del_re:136
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1214.tif initial_count:94 gt_count:111#sized_box_add:(514, 534, 566, 585)#current_cnt_add:113#sized_box_del_re:(350, 104, 384, 131)#current_cnt_del_re:111
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1221.tif initial_count:96 gt_count:99#sized_box_del_re:(407, 521, 446, 557)#current_cnt_del_re:95
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1222.tif initial_count:108 gt_count:123#sized_box_add:(238, 415, 315, 477)#current_cnt_add:127#sized_box_del_re:(596, 162, 631, 193)#current_cnt_del_re:122
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1223.tif initial_count:120 gt_count:132#sized_box_add:(168, 35, 205, 64)#current_cnt_add:128#sized_box_del_re:(94, 10, 120, 31)#current_cnt_del_re:126
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1224.tif initial_count:106 gt_count:115#sized_box_add:(371, 86, 398, 122)#current_cnt_add:110#sized_box_add:(491, 574, 523, 607)#current_cnt_add:128#sized_box_del_re:(195, 526, 220, 551)#current_cnt_del_re:126
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1231.tif initial_count:111 gt_count:114#sized_box_add:(228, 424, 315, 492)#current_cnt_add:117#sized_box_del_re:(474, 46, 506, 79)#current_cnt_del_re:114#sized_box_del_re:(103, 568, 127, 590)#current_cnt_del_re:113
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1232.tif initial_count:106 gt_count:108#sized_box_del_re:(264, 254, 286, 271)#current_cnt_del_re:103
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1233.tif initial_count:133 gt_count:134#sized_box_del_re:(303, 106, 327, 131)#current_cnt_del_re:125
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1234.tif initial_count:113 gt_count:118#sized_box_del_re:(562, 587, 585, 612)#current_cnt_del_re:111
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1241.tif initial_count:97 gt_count:99#sized_box_del_re:(75, 139, 103, 170)
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1242.tif initial_count:92 gt_count:95#sized_box_add:(195, 221, 257, 269)#current_cnt_add:98#sized_box_del_re:(371, 423, 402, 454)#current_cnt_del_re:91
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1243.tif initial_count:125 gt_count:136#sized_box_add:(389, 352, 450, 406)#current_cnt_add:143#sized_box_del_re:(589, 393, 621, 425)#current_cnt_del_re:140#sized_box_del_re:(251, 42, 282, 67)#current_cnt_del_re:136
+/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images/IMG_1244.tif initial_count:129 gt_count:155#sized_box_add:(418, 414, 464, 466)#current_cnt_add:164#sized_box_del_re:(283, 320, 317, 351)#current_cnt_del_re:160
