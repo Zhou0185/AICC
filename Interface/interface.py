@@ -5,7 +5,7 @@ import time
 import cv2
 import tkinter as tk
 import sys
-sys.path.append('/mnt/data/zrj/prj/AICC')  # 44
+sys.path.append('/home/hp/zrj/prjs/AICC')  # 43
 from models import build_model
 import torchvision.transforms as standard_transforms
 from sklearn.cluster import KMeans
@@ -114,16 +114,16 @@ class AICCInterface(tk.Tk):
                                 help="line number of anchor points")
             parser.add_argument('--output_dir', default='vis',
                                 help='path where to save')
-            parser.add_argument('--test_output_dir', default='/mnt/data/zrj/prj/AICC/output',
+            parser.add_argument('--test_output_dir', default='/home/hp/zrj/prjs/AICC/output',
                                 help='path where to save')  # 4_32
-            parser.add_argument('--weight_path', default='/mnt/data/zrj/Mymodel/CELLSsplit_v4_best_e20.pth',
+            parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/CELLSsplit_v4_best_e20.pth',
                                 help='path where the trained weights saved')  # 4_32服务器
             # parser.add_argument('--weight_path', default='/mnt/data/zrj/Mymodel/CELLSsplit_v4_best_e1500.pth',
             #                     help='path where the trained weights saved')  # 4_32服务器
 
             # CELLSsplitlatest1024b8e2000 CELLSlatestb8e2000 Cellsplitv3lastb4e2000.pth
             # parser.add_argument('--gpu_id', default=0, type=int, help='the gpu used for evaluation')
-            parser.add_argument('--gpu_id', default=1, type=int, help='the gpu used for evaluation')
+            parser.add_argument('--gpu_id', default=0, type=int, help='the gpu used for evaluation')
 
             return parser
 

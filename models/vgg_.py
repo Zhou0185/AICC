@@ -25,7 +25,7 @@ model_urls = {
 
 
 model_paths = {
-    'vgg16_bn': '/mnt/data/zrj/Mymodel/vgg16_bn-6c64b313.pth'#4_3
+    'vgg16_bn': '/home/hp/zrj/prjs/pth/vgg16_bn-6c64b313.pth'#4_3
     # 'vgg16_bn': '/mnt/data/zrj/Mymodel/vgg16_bn-6c64b313.pth'#4_4090
 }
 

@@ -18,6 +18,8 @@ from sklearn.cluster import KMeans
 # pdb.set_trace()
 del_re_time = []
 add_time = []
+# 添加新的配置参数来控制SSIM模式
+SSIM_MODE = "rgb"  # 可设置为 "rgb" 或 "avg"或 "gray"
 def DrawfPoints(points, Img_path):
         data = points
         llen = len(data)
@@ -59,7 +61,40 @@ def p2p_init_visual_counter():
     ])
     return model,device,transform,args
 
-def ssim(y_true, y_pred):
+
+def ssim_rgb(y_true, y_pred):
+    """
+    分通道计算SSIM后取平均值（RGB模式）
+    适用于彩色图像处理
+    """
+    y_pred = np.array(y_pred)
+    y_true = np.array(y_true)
+
+    # 如果是灰度图像（2维），则直接计算 SSIM
+    if y_true.ndim == 2 and y_pred.ndim == 2:
+        return calculate_ssim(y_true, y_pred)
+
+    # 如果是彩色图像（3维），则分通道计算 SSIM
+    if y_true.shape[2] != y_pred.shape[2]:
+        raise ValueError("输入图像的通道数不匹配")
+
+    ssim_channels = []
+    for i in range(y_true.shape[2]):
+        channel_true = y_true[:, :, i]
+        channel_pred = y_pred[:, :, i]
+
+        ssim = calculate_ssim(channel_true, channel_pred)
+        ssim_channels.append(ssim)
+
+    ssim_channels.remove(max(ssim_channels))
+    return np.mean(ssim_channels)
+
+
+def ssim_avg(y_true, y_pred):
+    """
+    先转换为灰度图再计算SSIM（AVG模式）
+    更关注图像整体结构相似性
+    """
     y_pred = np.array(y_pred)
     y_true = np.array(y_true)
 
@@ -80,8 +115,55 @@ def ssim(y_true, y_pred):
         ssim_channels.append(ssim)
 
     # 计算所有通道的平均 SSIM
-    ssim_channels.remove(max(ssim_channels))
     return np.mean(ssim_channels)
+
+
+def ssim_gray(y_true, y_pred):
+    """
+    将图像转换为灰度图像后计算SSIM
+    不依赖外部库的实现
+    """
+    # 确保输入是numpy数组
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+
+    # 检测数据范围
+    max_pixel = max(y_true.max(), y_pred.max())
+    min_pixel = min(y_true.min(), y_pred.min())
+    data_range = max_pixel - min_pixel
+
+    # 如果数据范围很小或为0，使用默认范围255
+    if data_range < 1.0:
+        data_range = 255.0
+
+    # 转换为灰度图像
+    if y_true.ndim == 3 and y_true.shape[2] == 3:  # RGB图像
+        y_true = (0.299 * y_true[:, :, 0] + 0.587 * y_true[:, :, 1] + 0.114 * y_true[:, :, 2])
+    elif y_true.ndim == 3:  # 多通道非RGB
+        y_true = np.mean(y_true, axis=2)
+
+    if y_pred.ndim == 3 and y_pred.shape[2] == 3:  # RGB图像
+        y_pred = (0.299 * y_pred[:, :, 0] + 0.587 * y_pred[:, :, 1] + 0.114 * y_pred[:, :, 2])
+    elif y_pred.ndim == 3:  # 多通道非RGB
+        y_pred = np.mean(y_pred, axis=2)
+
+    # 确保是2D灰度图像
+    if y_true.ndim != 2 or y_pred.ndim != 2:
+        raise ValueError("灰度转换失败，结果是三维数组")
+
+    # 计算灰度图像的SSIM
+    return calculate_ssim(y_true, y_pred)
+# 统一入口函数（根据配置选择不同模式）
+def ssim(y_true, y_pred):
+    """主SSIM计算函数，根据全局配置选择算法"""
+    if SSIM_MODE == "rgb":
+        return ssim_rgb(y_true, y_pred)
+    elif SSIM_MODE == "avg":
+        return ssim_avg(y_true, y_pred)
+    elif SSIM_MODE == "gray":
+        return ssim_gray(y_true, y_pred)
+    else:
+        raise ValueError(f"无效的SSIM模式: {SSIM_MODE}. 请使用 'rgb' 或 'avg'或 'gray'")
 
 def calculate_ssim(y_true, y_pred):
     u_true = np.mean(y_true)
@@ -98,8 +180,6 @@ def calculate_ssim(y_true, y_pred):
     ssim = (2 * u_true * u_pred + c1) * (2 * std_pred * std_true + c2)
     denom = (u_true ** 2 + u_pred ** 2 + c1) * (var_pred + var_true + c2)
     return ssim / denom
-
-
 
 def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,scores_005, current_points,current_scores,
                                     Display_width, Display_height, Image_Ori_W, Image_Ori_H, ssim_t=0.5):
@@ -714,9 +794,9 @@ def adaptation_boxes(inf,model,device,transform,root_path,ssim_t):
     print("F1point_score_cur{},Precision_score_cur{},Recall_score_cur{}".format(F1point_score_cur,Precision_score_cur,Recall_score_cur))
     return mae_ori,mse_ori,F1point_score_ori,Precision_score_ori,Recall_score_ori,mae_cur,mse_cur,F1point_score_cur,Precision_score_cur,Recall_score_cur
 
-def threeboxes_simulation(log_path,root_path):#用户真实交互，有三种交互，0-2次
-    model, device, transform,args = p2p_init_visual_counter()
-    ssim_t = args.ssim_t
+def threeboxes_simulation(model, device, transform, args, log_path, root_path, ssim_t):#用户真实交互，有三种交互，0-2次
+    # model, device, transform,args = p2p_init_visual_counter()
+    #ssim_t = args.ssim_t
     maes_ori, mses_ori = [], []
     m_F1point_scores_ori, m_Precision_scores_ori, m_Recall_scores_ori = [], [], []
     maes_cur, mses_cur = [], []
@@ -795,49 +875,88 @@ def threeboxes_simulation(log_path,root_path):#用户真实交互，有三种交
     # 记录日志
     run_log_path = "MAE_MSE_F1_P_R_scores_boxes.txt"
     with open(run_log_path, "a") as log_file:
+        # 记录基础信息
         log_file.write(f'\nEval Log {time.strftime("%c")}\n')
-        log_file.write(f"{args}\n")
-        log_file.write(f"m_F1point_score_ori: {m_F1point_score_ori}\n")
-        log_file.write(f"m_Precision_score_ori: {m_Precision_score_ori}\n")
-        log_file.write(f"m_Recall_score_ori: {m_Recall_score_ori}\n")
-        log_file.write(f"mae_ori: {mae_ori}, mse_ori: {mse_ori}\n")
+        log_file.write(f"Config: {args}\n")
+        log_file.write(f"Images: {len(interinf)}, SSIM_mode={SSIM_MODE}, ssim_t={ssim_t}\n")
 
-        log_file.write(f"m_F1point_score_cur: {m_F1point_score_cur}\n")
-        log_file.write(f"m_Precision_score_cur: {m_Precision_score_cur}\n")
-        log_file.write(f"m_Recall_score_cur: {m_Recall_score_cur}\n")
-        log_file.write(f"mae_cur: {mae_cur}, mse_cur: {mse_cur}\n")
+        # 单行记录原始模型性能指标
+        log_file.write(
+            f"ORIGINAL: F1={m_F1point_score_ori}, "
+            f"Precision={m_Precision_score_ori}, "
+            f"Recall={m_Recall_score_ori}, "
+            f"MAE={mae_ori}, "
+            f"MSE={mse_ori}\n"
+        )
 
-        log_file.write(f"num of img: {len(interinf)}, ssim_t: {ssim_t}\n")
-        # log_file.write(
-        #     f"num of del_re_times: {len(del_re_time)}, max_time: {np.max(del_re_time)}, mean_time: {np.mean(del_re_time)}\n")
-        # log_file.write(
-        #     f"num of add_times: {len(add_time)}, max_time: {np.max(add_time)}, mean_time: {np.mean(add_time)}\n")
+        # 单行记录当前模型性能指标
+        log_file.write(
+            f"CURRENT: F1={m_F1point_score_cur}, "
+            f"Precision={m_Precision_score_cur}, "
+            f"Recall={m_Recall_score_cur}, "
+            f"MAE={mae_cur}, "
+            f"MSE={mse_cur}\n"
+        )
+    # with open(run_log_path, "a") as log_file:
+    #     log_file.write(f'\nEval Log {time.strftime("%c")}\n')
+    #     log_file.write(f"{args}\n")
+    #     log_file.write(f"m_F1point_score_ori: {m_F1point_score_ori}\n")
+    #     log_file.write(f"m_Precision_score_ori: {m_Precision_score_ori}\n")
+    #     log_file.write(f"m_Recall_score_ori: {m_Recall_score_ori}\n")
+    #     log_file.write(f"mae_ori: {mae_ori}, mse_ori: {mse_ori}\n")
+    #
+    #     log_file.write(f"m_F1point_score_cur: {m_F1point_score_cur}\n")
+    #     log_file.write(f"m_Precision_score_cur: {m_Precision_score_cur}\n")
+    #     log_file.write(f"m_Recall_score_cur: {m_Recall_score_cur}\n")
+    #     log_file.write(f"mae_cur: {mae_cur}, mse_cur: {mse_cur}\n")
+    #
+    #     log_file.write(f"num of img: {len(interinf)}, ssim_{SSIM_MODE},ssim_t: {ssim_t}\n")
+    #     # log_file.write(
+    #     #     f"num of del_re_times: {len(del_re_time)}, max_time: {np.max(del_re_time)}, mean_time: {np.mean(del_re_time)}\n")
+    #     # log_file.write(
+    #     #     f"num of add_times: {len(add_time)}, max_time: {np.max(add_time)}, mean_time: {np.mean(add_time)}\n")
 
 def get_args_parser():
     parser = argparse.ArgumentParser('Set parameters for training P2PNet', add_help=False)
     # * Backbone
     parser.add_argument('--backbone', default='vgg16_bn', type=str,
                         help="name of the convolutional backbone to use")
-    # parser.add_argument('--weight_path', default='/mnt/data/zrj/Mymodel/NEFCell_best_e20.pth',
-    #                     help='path where the trained weights saved')  # 43090
-    parser.add_argument('--weight_path', default='/mnt/data/zrj/Mymodel/NEFCell_best_e1500.pth',
-                        help='path where the trained weights saved')  # 43090
+    parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/NEFCell_best_e1500.pth',
+                        help='path where the trained weights saved')
     parser.add_argument('--row', default=2, type=int,
                         help="row number of anchor points")
     parser.add_argument('--line', default=2, type=int,
                         help="line number of anchor points")
-    parser.add_argument('--ssim_t', default=0.8, type=int,
-                        help="ssim threshold")
+    parser.add_argument('--ssim_t_start', default=0, type=float,
+                        help="start value for ssim threshold range")
+    parser.add_argument('--ssim_t_end', default=1, type=float,
+                        help="end value for ssim threshold range")
+    parser.add_argument('--ssim_t_step', default=0.1, type=float,
+                        help="step size for ssim threshold range")
     # dataset parameters
     parser.add_argument('--gpu_id', default=0, type=int, help='the gpu used for training')
-
     return parser
 def main(args):
     #与非交互式计数方法对比,初始预测模型选择训练1500个epoch的
-    log_path = '/mnt/data/zrj/prj/AICC/interact_box_log_test192.txt'
-    root_path = '/mnt/data/zrj/Mydata/NEFCell/DATA_ROOT/test'  # 43090
-    threeboxes_simulation(log_path, root_path)
+    log_path = '/home/hp/zrj/prjs/AICC/interact_box_log_test192.txt'
+    root_path = '/home/hp/zrj/Data/NEFCell/DATA_ROOT/test'  # 43090
+    # 创建SSIM阈值范围
+    ssim_t_values = np.arange(
+        args.ssim_t_start,
+        args.ssim_t_end + args.ssim_t_step,
+        args.ssim_t_step
+    )
 
+    # 初始化模型（只初始化一次）
+    model, device, transform, args = p2p_init_visual_counter()
+
+    for ssim_t in ssim_t_values:
+        print(f"\n{'=' * 50}")
+        print(f"Testing with SSIM threshold: {ssim_t:.2f}")
+        print(f"{'=' * 50}")
+
+        # 修改SSIM阈值并运行测试
+        threeboxes_simulation(model, device, transform, args, log_path, root_path, ssim_t)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('P2PNet_simulation', parents=[get_args_parser()])

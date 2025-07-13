@@ -65,6 +65,7 @@ def p2p_init_visual_counter():
 
 
 def ssim(y_true, y_pred):
+
     y_pred = np.array(y_pred)
     y_true = np.array(y_true)
 
@@ -84,7 +85,6 @@ def ssim(y_true, y_pred):
         ssim = calculate_ssim(channel_true, channel_pred)
         ssim_channels.append(ssim)
 
-    # 计算所有通道的平均 SSIM
     ssim_channels.remove(max(ssim_channels))
     return np.mean(ssim_channels)
 
@@ -104,6 +104,7 @@ def calculate_ssim(y_true, y_pred):
     ssim = (2 * u_true * u_pred + c1) * (2 * std_pred * std_true + c2)
     denom = (u_true ** 2 + u_pred ** 2 + c1) * (var_pred + var_true + c2)
     return ssim / denom
+
 
 
 def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005, scores_005, current_points,
@@ -756,37 +757,535 @@ def sixboxes_simulation(log_path, root_path):  # 模拟交互，3次加点，3�
             with open(run_log_path, "a") as log_file:
                 log_file.write(f'\nEval Log {time.strftime("%c")}\n')
                 log_file.write(f"{args}\n")
-                log_file.write(f"m_F1point_score_ori: {m_F1point_score_ori}\n")
-                log_file.write(f"m_Precision_score_ori: {m_Precision_score_ori}\n")
-                log_file.write(f"m_Recall_score_ori: {m_Recall_score_ori}\n")
-                log_file.write(f"mae_ori: {mae_ori}, mse_ori: {mse_ori}, rmse_ori: {rmse_ori}\n")
-                # 记录当前分数的均值
+
+                # 合并原始评估指标为一行（F1, Precision, Recall）
+                log_file.write(
+                    f"Original Scores: F1={m_F1point_score_ori}, Precision={m_Precision_score_ori}, Recall={m_Recall_score_ori}\n")
+
+                # 合并错误指标为一行（MAE, MSE, RMSE）
+                log_file.write(f"Original Errors: MAE={mae_ori}, MSE={mse_ori}, RMSE={rmse_ori}\n")
+
+                # 记录当前迭代的评估分数均值
                 for i, (f1, precision, recall) in enumerate(
                         zip(m_F1point_scores_cur, m_Precision_scores_cur, m_Recall_scores_cur)):
-                    log_file.write(f"m_F1point_score_cur{i}: {np.mean(f1)}\n")
-                    log_file.write(f"m_Precision_score_cur{i}: {np.mean(precision)}\n")
-                    log_file.write(f"m_Recall_score_cur{i}: {np.mean(recall)}\n")
-                # 记录当前 MAE 和 MSE 的均值
+                    log_file.write(
+                        f"Curr Scores #{i}: F1={np.mean(f1)}, Precision={np.mean(precision)}, Recall={np.mean(recall)}\n")
+
+                # 记录当前迭代的错误指标均值（单行写入）
                 for i, (mae, mse) in enumerate(zip(maes_cur, mses_cur)):
-                    log_file.write(f"maes_cur{i}: {np.mean(mae)}\n")
-                    log_file.write(f"mses_cur{i}: {np.mean(mse)}\n")
-                    log_file.write(f"rmses_cur{i}: {np.sqrt(np.mean(mse))}\n")
+                    mean_mae = np.mean(mae)
+                    mean_mse = np.mean(mse)
+                    mean_rmse = np.sqrt(mean_mse)
+                    log_file.write(f"Curr Errors #{i}: MAE={mean_mae}, MSE={mean_mse}, RMSE={mean_rmse}\n")
 
-                log_file.write(f"num of img: {len(interinf)}\n")
-                log_file.write(f"num of img: {len(interinf)}, confidence_t: {threshold}, ssim_t: {ssim_t}\n")
+                log_file.write(f"Processed images: {len(interinf)}\n")
+                log_file.write(f"Config: confidence_t={threshold}, ssim_mode=rgb, ssim_t={ssim_t}\n")
 
                 log_file.write(
-                    f"num of del_re_times: {len(del_re_time)}, max_time: {np.max(del_re_time)}, mean_time: {np.mean(del_re_time)}\n")
+                    f"Del Times: Count={len(del_re_time)}, Max={np.max(del_re_time)}, Mean={np.mean(del_re_time)}\n")
                 log_file.write(
-                    f"num of add_times: {len(add_time)}, max_time: {np.max(add_time)}, mean_time: {np.mean(add_time)}\n")  #
+                    f"Add Times: Count={len(add_time)}, Max={np.max(add_time)}, Mean={np.mean(add_time)}\n")
+def sixboxes_simulation_PE(log_path, root_path):  # 模拟交互，3次加点，3次删除重复点
+    # log_path = "/mnt/disk3/zrj/PICACount/interact_box_log_Cellsplitv4lastb4e6交互_box33.txt"#43090
+    log_path = log_path
+    # root_path = "/media/xd/zrj/Prjs/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v3/DATA_ROOT/test"
+    model, device, transform, args = p2p_init_visual_counter()
+    ssim_t = args.ssim_t
 
+    def ReSizedPoints(points):
+        resizedpoints = []
+        data = points
+        llen = len(data)
+        for i in range(llen):
+            x = round(int(data[i][0]) * Image_Ori_W // Display_width)
+            y = round(int(data[i][1]) * Image_Ori_H // Display_height)
+            resizedpoints.append((x, y))
+            # print(int(data[i][0]),int(data[i][1]),"__",x,y)
+        return resizedpoints
 
+    maes_ori, mses_ori = [], []
+    m_F1point_scores_ori, m_Precision_scores_ori, m_Recall_scores_ori = [], [], []
+
+    # 使用列表创建三个子列表
+    m_F1point_scores_cur = [[] for _ in range(6)]
+    m_Precision_scores_cur = [[] for _ in range(6)]
+    m_Recall_scores_cur = [[] for _ in range(6)]
+    maes_cur = [[] for _ in range(6)]
+    mses_cur = [[] for _ in range(6)]
+    if log_path:
+        with open(log_path, "r") as f:
+            interinf = f.readlines()
+            for inf in interinf:
+                EXEMPLAR_BBX_ori_add_list, EXEMPLAR_BBX_ori_del_list, points_05, points_005, scores_05, scores_005, p_gt, \
+                img_n, Image_path, Display_width, Display_height, Image_Ori_W, Image_Ori_H \
+                    = dataplot_v3_drawbox_3_3(inf, model, device, transform, root_path)
+                # 创建包含所有框的统一列表
+                all_boxes = []
+                for i in range(len(EXEMPLAR_BBX_ori_add_list)):
+                    all_boxes.append(EXEMPLAR_BBX_ori_add_list[i])  # 添加框
+                    all_boxes.append(EXEMPLAR_BBX_ori_del_list[i])  # 删除框
+                print("lenall_boxes):",len(all_boxes))
+                print(Image_path, EXEMPLAR_BBX_ori_add_list, EXEMPLAR_BBX_ori_del_list)
+                print("points_05,points_005,p_gt ", len(points_05), len(points_005), len(p_gt))
+                gt_count = len(p_gt)
+
+                def SizedPoints(points):
+                    sizedpoints = []
+                    data = points
+                    llen = len(data)
+                    for i in range(llen):
+                        x = round(int(data[i][0]) * Display_width // Image_Ori_W)
+                        y = round(int(data[i][1]) * Display_height // Image_Ori_H)
+                        sizedpoints.append((x, y))
+                        # print(int(data[i][0]),int(data[i][1]),"__",x,y)
+                    return sizedpoints
+
+                sizedpointsraw_05 = SizedPoints(points_05)
+                sizedpoints = torch.tensor(sizedpointsraw_05).view(-1, 2).tolist()
+                current_points = sizedpoints
+                current_scores = scores_05
+                initial_count = len(sizedpoints)
+                threshold = 0.5
+                # threshold = 10#无knn
+                TP = HungarianMatch(p_gt, points_05, threshold)
+
+                F1point_score_ori, Precision_score_ori, Recall_score_ori = pointF1_score(TP, p_gt, points_05)
+                maes_ori.append(abs(initial_count - gt_count))
+                mses_ori.append(abs(initial_count - gt_count) ** 2)
+                for i in range(len(all_boxes)):
+                    img_n, current_count, current_points, current_scores \
+                        = interactive_adaptation_boxs_add(img_n, all_boxes[i],
+                                                          Image_path, points_005, scores_005, current_points,
+                                                          current_scores,
+                                                          Display_width, Display_height,
+                                                          Image_Ori_W, Image_Ori_H,
+                                                          ssim_t)
+                    print("initial_count, add_current_count:", initial_count, current_count)
+                    # img_n, current_count, current_points, current_scores \
+                    #     = interactive_adaptation_boxs_del(img_n, EXEMPLAR_BBX_ori_del_list[i],
+                    #                                       Image_path, points_005, scores_005, current_points,
+                    #                                       current_scores,
+                    #                                       Display_width, Display_height,
+                    #                                       Image_Ori_W, Image_Ori_H,
+                    #                                       ssim_t)
+                    # print("initial_count, del_current_count:", initial_count, current_count)
+
+                    maes_cur[i].append(abs(current_count - gt_count))
+                    mses_cur[i].append(abs(current_count - gt_count) ** 2)
+
+                    resizedpoints = ReSizedPoints(current_points)
+                    TP = HungarianMatch(p_gt, resizedpoints, threshold)
+                    F1point_score_cur, Precision_score_cur, Recall_score_cur = pointF1_score(TP, p_gt, resizedpoints,
+                                                                                             )
+                    print("F1point_score_ori{},F1point_score_cur{}:{}".format(F1point_score_ori, i, F1point_score_cur))
+                    m_F1point_scores_cur[i].append(F1point_score_cur)
+                    m_Precision_scores_cur[i].append(Precision_score_cur)
+                    m_Recall_scores_cur[i].append(Recall_score_cur)
+                    # plt.imshow(img_n)
+                    # plt.show()  # 显示图片
+                m_F1point_scores_ori.append(F1point_score_ori)
+                m_Precision_scores_ori.append(Precision_score_ori)
+                m_Recall_scores_ori.append(Recall_score_ori)
+                # m_F1point_scores_cur.append(F1point_score_cur)
+                # break
+
+            # 计算原始分数的均值并打印
+            m_F1point_score_ori = np.mean(m_F1point_scores_ori)
+            m_Precision_score_ori = np.mean(m_Precision_scores_ori)
+            m_Recall_score_ori = np.mean(m_Recall_scores_ori)
+            mae_ori = np.mean(maes_ori)
+            mse_ori = np.mean(mses_ori)
+            rmse_ori = np.sqrt(mse_ori)
+            print(f"m_F1point_score_ori: {m_F1point_score_ori}")
+            print(f"m_Precision_score_ori: {m_Precision_score_ori}")
+            print(f"m_Recall_score_ori: {m_Recall_score_ori}")
+            print(f"mae_ori: {mae_ori}, mse_ori: {mse_ori}, rmse_ori: {rmse_ori}")
+            # 打印当前分数的均值
+            for i, (f1, precision, recall) in enumerate(
+                    zip(m_F1point_scores_cur, m_Precision_scores_cur, m_Recall_scores_cur)):
+                print(f"m_F1point_score_cur{i}: {np.mean(f1)}")
+                print(f"m_Precision_score_cur{i}: {np.mean(precision)}")
+                print(f"m_Recall_score_cur{i}: {np.mean(recall)}")
+            # 打印当前 MAE 和 MSE 的均值
+            for i, (mae, mse) in enumerate(zip(maes_cur, mses_cur)):
+                print(f"maes_cur{i}: {np.mean(mae)}")
+                print(f"mses_cur{i}: {np.mean(mse)}")
+                print(f"rmses_cur{i}: {np.sqrt(np.mean(mse))}")
+            # 记录日志
+            run_log_path = "MAE_MSE_F1_P_R_scores_box33.txt"
+            with open(run_log_path, "a") as log_file:
+                log_file.write(f'\nEval Log {time.strftime("%c")}\n')
+                log_file.write(f"{args}\n")
+                log_file.write(f"PE_ONLY\n")
+                # 合并原始评估指标为一行（F1, Precision, Recall）
+                log_file.write(
+                    f"Original Scores: F1={m_F1point_score_ori}, Precision={m_Precision_score_ori}, Recall={m_Recall_score_ori}\n")
+
+                # 合并错误指标为一行（MAE, MSE, RMSE）
+                log_file.write(f"Original Errors: MAE={mae_ori}, MSE={mse_ori}, RMSE={rmse_ori}\n")
+
+                # 记录当前迭代的评估分数均值
+                for i, (f1, precision, recall) in enumerate(
+                        zip(m_F1point_scores_cur, m_Precision_scores_cur, m_Recall_scores_cur)):
+                    log_file.write(
+                        f"Curr Scores #{i}: F1={np.mean(f1)}, Precision={np.mean(precision)}, Recall={np.mean(recall)}\n")
+
+                # 记录当前迭代的错误指标均值（单行写入）
+                for i, (mae, mse) in enumerate(zip(maes_cur, mses_cur)):
+                    mean_mae = np.mean(mae)
+                    mean_mse = np.mean(mse)
+                    mean_rmse = np.sqrt(mean_mse)
+                    log_file.write(f"Curr Errors #{i}: MAE={mean_mae}, MSE={mean_mse}, RMSE={mean_rmse}\n")
+
+                log_file.write(f"Processed images: {len(interinf)}\n")
+                log_file.write(f"Config: confidence_t={threshold}, ssim_mode=rgb, ssim_t={ssim_t}\n")
+
+                # log_file.write(
+                #     f"Del Times: Count={len(del_re_time)}, Max={np.max(del_re_time)}, Mean={np.mean(del_re_time)}\n")
+                log_file.write(
+                    f"Add Times: Count={len(add_time)}, Max={np.max(add_time)}, Mean={np.mean(add_time)}\n")
+def sixboxes_simulation_PF(log_path, root_path):  # 模拟交互，3次加点，3次删除重复点
+    # log_path = "/mnt/disk3/zrj/PICACount/interact_box_log_Cellsplitv4lastb4e6交互_box33.txt"#43090
+    log_path = log_path
+    # root_path = "/media/xd/zrj/Prjs/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v3/DATA_ROOT/test"
+    model, device, transform, args = p2p_init_visual_counter()
+    ssim_t = args.ssim_t
+
+    def ReSizedPoints(points):
+        resizedpoints = []
+        data = points
+        llen = len(data)
+        for i in range(llen):
+            x = round(int(data[i][0]) * Image_Ori_W // Display_width)
+            y = round(int(data[i][1]) * Image_Ori_H // Display_height)
+            resizedpoints.append((x, y))
+            # print(int(data[i][0]),int(data[i][1]),"__",x,y)
+        return resizedpoints
+
+    maes_ori, mses_ori = [], []
+    m_F1point_scores_ori, m_Precision_scores_ori, m_Recall_scores_ori = [], [], []
+
+    # 使用列表创建三个子列表
+    m_F1point_scores_cur = [[] for _ in range(6)]
+    m_Precision_scores_cur = [[] for _ in range(6)]
+    m_Recall_scores_cur = [[] for _ in range(6)]
+    maes_cur = [[] for _ in range(6)]
+    mses_cur = [[] for _ in range(6)]
+    if log_path:
+        with open(log_path, "r") as f:
+            interinf = f.readlines()
+            for inf in interinf:
+                EXEMPLAR_BBX_ori_add_list, EXEMPLAR_BBX_ori_del_list, points_05, points_005, scores_05, scores_005, p_gt, \
+                img_n, Image_path, Display_width, Display_height, Image_Ori_W, Image_Ori_H \
+                    = dataplot_v3_drawbox_3_3(inf, model, device, transform, root_path)
+                # 创建包含所有框的统一列表
+                all_boxes = []
+                for i in range(len(EXEMPLAR_BBX_ori_add_list)):
+                    all_boxes.append(EXEMPLAR_BBX_ori_add_list[i])  # 添加框
+                    all_boxes.append(EXEMPLAR_BBX_ori_del_list[i])  # 删除框
+
+                print(Image_path, EXEMPLAR_BBX_ori_add_list, EXEMPLAR_BBX_ori_del_list)
+                print("points_05,points_005,p_gt ", len(points_05), len(points_005), len(p_gt))
+                gt_count = len(p_gt)
+
+                def SizedPoints(points):
+                    sizedpoints = []
+                    data = points
+                    llen = len(data)
+                    for i in range(llen):
+                        x = round(int(data[i][0]) * Display_width // Image_Ori_W)
+                        y = round(int(data[i][1]) * Display_height // Image_Ori_H)
+                        sizedpoints.append((x, y))
+                        # print(int(data[i][0]),int(data[i][1]),"__",x,y)
+                    return sizedpoints
+
+                sizedpointsraw_05 = SizedPoints(points_05)
+                sizedpoints = torch.tensor(sizedpointsraw_05).view(-1, 2).tolist()
+                current_points = sizedpoints
+                current_scores = scores_05
+                initial_count = len(sizedpoints)
+                threshold = 0.5
+                # threshold = 10#无knn
+                TP = HungarianMatch(p_gt, points_05, threshold)
+
+                F1point_score_ori, Precision_score_ori, Recall_score_ori = pointF1_score(TP, p_gt, points_05)
+                maes_ori.append(abs(initial_count - gt_count))
+                mses_ori.append(abs(initial_count - gt_count) ** 2)
+                for i in range(len(all_boxes)):
+                    img_n, current_count, current_points, current_scores \
+                        = interactive_adaptation_boxs_del(img_n, all_boxes[i],
+                                                          Image_path, points_005, scores_005, current_points,
+                                                          current_scores,
+                                                          Display_width, Display_height,
+                                                          Image_Ori_W, Image_Ori_H,
+                                                          ssim_t)
+                    print("initial_count, del_current_count:", initial_count, current_count)
+                    # img_n, current_count, current_points, current_scores \
+                    #     = interactive_adaptation_boxs_del(img_n, EXEMPLAR_BBX_ori_del_list[i],
+                    #                                       Image_path, points_005, scores_005, current_points,
+                    #                                       current_scores,
+                    #                                       Display_width, Display_height,
+                    #                                       Image_Ori_W, Image_Ori_H,
+                    #                                       ssim_t)
+                    # print("initial_count, del_current_count:", initial_count, current_count)
+
+                    maes_cur[i].append(abs(current_count - gt_count))
+                    mses_cur[i].append(abs(current_count - gt_count) ** 2)
+
+                    resizedpoints = ReSizedPoints(current_points)
+                    TP = HungarianMatch(p_gt, resizedpoints, threshold)
+                    F1point_score_cur, Precision_score_cur, Recall_score_cur = pointF1_score(TP, p_gt, resizedpoints,
+                                                                                             )
+                    print("F1point_score_ori{},F1point_score_cur{}:{}".format(F1point_score_ori, i, F1point_score_cur))
+                    m_F1point_scores_cur[i].append(F1point_score_cur)
+                    m_Precision_scores_cur[i].append(Precision_score_cur)
+                    m_Recall_scores_cur[i].append(Recall_score_cur)
+                    # plt.imshow(img_n)
+                    # plt.show()  # 显示图片
+                m_F1point_scores_ori.append(F1point_score_ori)
+                m_Precision_scores_ori.append(Precision_score_ori)
+                m_Recall_scores_ori.append(Recall_score_ori)
+                # m_F1point_scores_cur.append(F1point_score_cur)
+                # break
+
+            # 计算原始分数的均值并打印
+            m_F1point_score_ori = np.mean(m_F1point_scores_ori)
+            m_Precision_score_ori = np.mean(m_Precision_scores_ori)
+            m_Recall_score_ori = np.mean(m_Recall_scores_ori)
+            mae_ori = np.mean(maes_ori)
+            mse_ori = np.mean(mses_ori)
+            rmse_ori = np.sqrt(mse_ori)
+            print(f"m_F1point_score_ori: {m_F1point_score_ori}")
+            print(f"m_Precision_score_ori: {m_Precision_score_ori}")
+            print(f"m_Recall_score_ori: {m_Recall_score_ori}")
+            print(f"mae_ori: {mae_ori}, mse_ori: {mse_ori}, rmse_ori: {rmse_ori}")
+            # 打印当前分数的均值
+            for i, (f1, precision, recall) in enumerate(
+                    zip(m_F1point_scores_cur, m_Precision_scores_cur, m_Recall_scores_cur)):
+                print(f"m_F1point_score_cur{i}: {np.mean(f1)}")
+                print(f"m_Precision_score_cur{i}: {np.mean(precision)}")
+                print(f"m_Recall_score_cur{i}: {np.mean(recall)}")
+            # 打印当前 MAE 和 MSE 的均值
+            for i, (mae, mse) in enumerate(zip(maes_cur, mses_cur)):
+                print(f"maes_cur{i}: {np.mean(mae)}")
+                print(f"mses_cur{i}: {np.mean(mse)}")
+                print(f"rmses_cur{i}: {np.sqrt(np.mean(mse))}")
+            # 记录日志
+            run_log_path = "MAE_MSE_F1_P_R_scores_box33.txt"
+            with open(run_log_path, "a") as log_file:
+                log_file.write(f'\nEval Log {time.strftime("%c")}\n')
+                log_file.write(f"{args}\n")
+                log_file.write(f"PF_ONLY\n")
+                # 合并原始评估指标为一行（F1, Precision, Recall）
+                log_file.write(
+                    f"Original Scores: F1={m_F1point_score_ori}, Precision={m_Precision_score_ori}, Recall={m_Recall_score_ori}\n")
+
+                # 合并错误指标为一行（MAE, MSE, RMSE）
+                log_file.write(f"Original Errors: MAE={mae_ori}, MSE={mse_ori}, RMSE={rmse_ori}\n")
+
+                # 记录当前迭代的评估分数均值
+                for i, (f1, precision, recall) in enumerate(
+                        zip(m_F1point_scores_cur, m_Precision_scores_cur, m_Recall_scores_cur)):
+                    log_file.write(
+                        f"Curr Scores #{i}: F1={np.mean(f1)}, Precision={np.mean(precision)}, Recall={np.mean(recall)}\n")
+
+                # 记录当前迭代的错误指标均值（单行写入）
+                for i, (mae, mse) in enumerate(zip(maes_cur, mses_cur)):
+                    mean_mae = np.mean(mae)
+                    mean_mse = np.mean(mse)
+                    mean_rmse = np.sqrt(mean_mse)
+                    log_file.write(f"Curr Errors #{i}: MAE={mean_mae}, MSE={mean_mse}, RMSE={mean_rmse}\n")
+
+                log_file.write(f"Processed images: {len(interinf)}\n")
+                log_file.write(f"Config: confidence_t={threshold}, ssim_mode=rgb, ssim_t={ssim_t}\n")
+
+                log_file.write(
+                    f"Del Times: Count={len(del_re_time)}, Max={np.max(del_re_time)}, Mean={np.mean(del_re_time)}\n")
+                # log_file.write(
+                #     f"Add Times: Count={len(add_time)}, Max={np.max(add_time)}, Mean={np.mean(add_time)}\n")
+def sixboxes_simulation_PE_PF(log_path, root_path):  # 模拟交互，3次加点，3次删除重复点
+    # log_path = "/mnt/disk3/zrj/PICACount/interact_box_log_Cellsplitv4lastb4e6交互_box33.txt"#43090
+    log_path = log_path
+    # root_path = "/media/xd/zrj/Prjs/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v3/DATA_ROOT/test"
+    model, device, transform, args = p2p_init_visual_counter()
+    ssim_t = args.ssim_t
+
+    def ReSizedPoints(points):
+        resizedpoints = []
+        data = points
+        llen = len(data)
+        for i in range(llen):
+            x = round(int(data[i][0]) * Image_Ori_W // Display_width)
+            y = round(int(data[i][1]) * Image_Ori_H // Display_height)
+            resizedpoints.append((x, y))
+            # print(int(data[i][0]),int(data[i][1]),"__",x,y)
+        return resizedpoints
+
+    maes_ori, mses_ori = [], []
+    m_F1point_scores_ori, m_Precision_scores_ori, m_Recall_scores_ori = [], [], []
+
+    # 使用列表创建三个子列表
+    m_F1point_scores_cur = [[] for _ in range(6)]
+    m_Precision_scores_cur = [[] for _ in range(6)]
+    m_Recall_scores_cur = [[] for _ in range(6)]
+    maes_cur = [[] for _ in range(6)]
+    mses_cur = [[] for _ in range(6)]
+    if log_path:
+        with open(log_path, "r") as f:
+            interinf = f.readlines()
+            for inf in interinf:
+                EXEMPLAR_BBX_ori_add_list, EXEMPLAR_BBX_ori_del_list, points_05, points_005, scores_05, scores_005, p_gt, \
+                img_n, Image_path, Display_width, Display_height, Image_Ori_W, Image_Ori_H \
+                    = dataplot_v3_drawbox_3_3(inf, model, device, transform, root_path)
+                # 创建包含所有框的统一列表
+                all_boxes = []
+                for i in range(len(EXEMPLAR_BBX_ori_add_list)):
+                    all_boxes.append(EXEMPLAR_BBX_ori_add_list[i])  # 添加框
+                    all_boxes.append(EXEMPLAR_BBX_ori_del_list[i])  # 删除框
+
+                print(Image_path, EXEMPLAR_BBX_ori_add_list, EXEMPLAR_BBX_ori_del_list)
+                print("points_05,points_005,p_gt ", len(points_05), len(points_005), len(p_gt))
+                gt_count = len(p_gt)
+
+                def SizedPoints(points):
+                    sizedpoints = []
+                    data = points
+                    llen = len(data)
+                    for i in range(llen):
+                        x = round(int(data[i][0]) * Display_width // Image_Ori_W)
+                        y = round(int(data[i][1]) * Display_height // Image_Ori_H)
+                        sizedpoints.append((x, y))
+                        # print(int(data[i][0]),int(data[i][1]),"__",x,y)
+                    return sizedpoints
+
+                sizedpointsraw_05 = SizedPoints(points_05)
+                sizedpoints = torch.tensor(sizedpointsraw_05).view(-1, 2).tolist()
+                current_points = sizedpoints
+                current_scores = scores_05
+                initial_count = len(sizedpoints)
+                threshold = 0.5
+                # threshold = 10#无knn
+                TP = HungarianMatch(p_gt, points_05, threshold)
+
+                F1point_score_ori, Precision_score_ori, Recall_score_ori = pointF1_score(TP, p_gt, points_05)
+                maes_ori.append(abs(initial_count - gt_count))
+                mses_ori.append(abs(initial_count - gt_count) ** 2)
+                for i in range(len(all_boxes)):
+                    if(i%2==0):
+                        img_n, current_count, current_points, current_scores \
+                            = interactive_adaptation_boxs_add(img_n, all_boxes[i],
+                                                              Image_path, points_005, scores_005, current_points,
+                                                              current_scores,
+                                                              Display_width, Display_height,
+                                                              Image_Ori_W, Image_Ori_H,
+                                                              ssim_t)
+                        print("initial_count, add_current_count:", initial_count, current_count)
+
+                        maes_cur[i].append(abs(current_count - gt_count))
+                        mses_cur[i].append(abs(current_count - gt_count) ** 2)
+
+                        resizedpoints = ReSizedPoints(current_points)
+                        TP = HungarianMatch(p_gt, resizedpoints, threshold)
+                        F1point_score_cur, Precision_score_cur, Recall_score_cur = pointF1_score(TP, p_gt, resizedpoints,
+                                                                                                 )
+                        print("F1point_score_ori{},F1point_score_cur{}:{}".format(F1point_score_ori, i, F1point_score_cur))
+                        m_F1point_scores_cur[i].append(F1point_score_cur)
+                        m_Precision_scores_cur[i].append(Precision_score_cur)
+                        m_Recall_scores_cur[i].append(Recall_score_cur)
+                        # plt.imshow(img_n)
+                        # plt.show()  # 显示图片
+                    else:
+                        img_n, current_count, current_points, current_scores \
+                            = interactive_adaptation_boxs_del(img_n, all_boxes[i],
+                                                              Image_path, points_005, scores_005, current_points,
+                                                              current_scores,
+                                                              Display_width, Display_height,
+                                                              Image_Ori_W, Image_Ori_H,
+                                                              ssim_t)
+                        print("initial_count, del_current_count:", initial_count, current_count)
+
+                        maes_cur[i].append(abs(current_count - gt_count))
+                        mses_cur[i].append(abs(current_count - gt_count) ** 2)
+
+                        resizedpoints = ReSizedPoints(current_points)
+                        TP = HungarianMatch(p_gt, resizedpoints, threshold)
+                        F1point_score_cur, Precision_score_cur, Recall_score_cur = pointF1_score(TP, p_gt,
+                                                                                                 resizedpoints,
+                                                                                                 )
+                        print("F1point_score_ori{},F1point_score_cur{}:{}".format(F1point_score_ori, i,
+                                                                                  F1point_score_cur))
+                        m_F1point_scores_cur[i].append(F1point_score_cur)
+                        m_Precision_scores_cur[i].append(Precision_score_cur)
+                        m_Recall_scores_cur[i].append(Recall_score_cur)
+                        # plt.imshow(img_n)
+                        # plt.show()  # 显示图片
+                m_F1point_scores_ori.append(F1point_score_ori)
+                m_Precision_scores_ori.append(Precision_score_ori)
+                m_Recall_scores_ori.append(Recall_score_ori)
+                # m_F1point_scores_cur.append(F1point_score_cur)
+                # break
+
+            # 计算原始分数的均值并打印
+            m_F1point_score_ori = np.mean(m_F1point_scores_ori)
+            m_Precision_score_ori = np.mean(m_Precision_scores_ori)
+            m_Recall_score_ori = np.mean(m_Recall_scores_ori)
+            mae_ori = np.mean(maes_ori)
+            mse_ori = np.mean(mses_ori)
+            rmse_ori = np.sqrt(mse_ori)
+            print(f"m_F1point_score_ori: {m_F1point_score_ori}")
+            print(f"m_Precision_score_ori: {m_Precision_score_ori}")
+            print(f"m_Recall_score_ori: {m_Recall_score_ori}")
+            print(f"mae_ori: {mae_ori}, mse_ori: {mse_ori}, rmse_ori: {rmse_ori}")
+            # 打印当前分数的均值
+            for i, (f1, precision, recall) in enumerate(
+                    zip(m_F1point_scores_cur, m_Precision_scores_cur, m_Recall_scores_cur)):
+                print(f"m_F1point_score_cur{i}: {np.mean(f1)}")
+                print(f"m_Precision_score_cur{i}: {np.mean(precision)}")
+                print(f"m_Recall_score_cur{i}: {np.mean(recall)}")
+            # 打印当前 MAE 和 MSE 的均值
+            for i, (mae, mse) in enumerate(zip(maes_cur, mses_cur)):
+                print(f"maes_cur{i}: {np.mean(mae)}")
+                print(f"mses_cur{i}: {np.mean(mse)}")
+                print(f"rmses_cur{i}: {np.sqrt(np.mean(mse))}")
+            # 记录日志
+            run_log_path = "MAE_MSE_F1_P_R_scores_box33.txt"
+            with open(run_log_path, "a") as log_file:
+                log_file.write(f'\nEval Log {time.strftime("%c")}\n')
+                log_file.write(f"{args}\n")
+                log_file.write(f"PE_PF\n")
+                # 合并原始评估指标为一行（F1, Precision, Recall）
+                log_file.write(
+                    f"Original Scores: F1={m_F1point_score_ori}, Precision={m_Precision_score_ori}, Recall={m_Recall_score_ori}\n")
+
+                # 合并错误指标为一行（MAE, MSE, RMSE）
+                log_file.write(f"Original Errors: MAE={mae_ori}, MSE={mse_ori}, RMSE={rmse_ori}\n")
+
+                # 记录当前迭代的评估分数均值
+                for i, (f1, precision, recall) in enumerate(
+                        zip(m_F1point_scores_cur, m_Precision_scores_cur, m_Recall_scores_cur)):
+                    log_file.write(
+                        f"Curr Scores #{i}: F1={np.mean(f1)}, Precision={np.mean(precision)}, Recall={np.mean(recall)}\n")
+
+                # 记录当前迭代的错误指标均值（单行写入）
+                for i, (mae, mse) in enumerate(zip(maes_cur, mses_cur)):
+                    mean_mae = np.mean(mae)
+                    mean_mse = np.mean(mse)
+                    mean_rmse = np.sqrt(mean_mse)
+                    log_file.write(f"Curr Errors #{i}: MAE={mean_mae}, MSE={mean_mse}, RMSE={mean_rmse}\n")
+
+                log_file.write(f"Processed images: {len(interinf)}\n")
+                log_file.write(f"Config: confidence_t={threshold}, ssim_mode=rgb, ssim_t={ssim_t}\n")
+
+                log_file.write(
+                    f"Del Times: Count={len(del_re_time)}, Max={np.max(del_re_time)}, Mean={np.mean(del_re_time)}\n")
+                log_file.write(
+                    f"Add Times: Count={len(add_time)}, Max={np.max(add_time)}, Mean={np.mean(add_time)}\n")
 def get_args_parser():
     parser = argparse.ArgumentParser('Set parameters for training P2PNet', add_help=False)
     # * Backbone
     parser.add_argument('--backbone', default='vgg16_bn', type=str,
                         help="name of the convolutional backbone to use")
-    parser.add_argument('--weight_path', default='/mnt/data/zrj/Mymodel/NEFCell_best_e20.pth',
+    parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/NEFCell_best_e20.pth',
                         help='path where the trained weights saved')  # 43090
     # parser.add_argument('--weight_path', default='/mnt/data/zrj/Mymodel/NEFCell_best_e1500.pth',
     #                     help='path where the trained weights saved')  # 43090
@@ -804,9 +1303,12 @@ def get_args_parser():
 
 def main(args):
     # 与交互式计数方法对比,初始预测模型选择训练20个epoch的
-    log_path = "/mnt/data/zrj/prj/AICC/interact_box_log_test192_box33.txt"  # 43090
-    root_path = '/mnt/data/zrj/Mydata/NEFCell/DATA_ROOT/test'  # 43090
-    sixboxes_simulation(log_path, root_path)
+    log_path = "/home/hp/zrj/prjs/AICC/interact_box_log_test192_box33.txt"  # 43090
+    root_path = '/home/hp/zrj/Data/NEFCell/DATA_ROOT/test'  # 43090
+    # sixboxes_simulation(log_path, root_path)
+    #sixboxes_simulation_PE(log_path, root_path)
+    sixboxes_simulation_PF(log_path, root_path)
+    #sixboxes_simulation_PE_PF(log_path, root_path)
 
 
 if __name__ == '__main__':
