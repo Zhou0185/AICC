@@ -18,7 +18,7 @@ from sklearn.cluster import KMeans
 # pdb.set_trace()
 del_re_time = []
 add_time = []
-
+SSIM_MODE = "gray"  # 可设置为 "rgb" 或 "avg"或 "gray"
 
 def DrawfPoints(points, Img_path):
     data = points
@@ -64,8 +64,11 @@ def p2p_init_visual_counter():
     return model, device, transform, args
 
 
-def ssim(y_true, y_pred):
-
+def ssim_rgb(y_true, y_pred):
+    """
+    分通道计算SSIM后取平均值（RGB模式）
+    适用于彩色图像处理
+    """
     y_pred = np.array(y_pred)
     y_true = np.array(y_true)
 
@@ -89,6 +92,81 @@ def ssim(y_true, y_pred):
     return np.mean(ssim_channels)
 
 
+def ssim_avg(y_true, y_pred):
+    """
+    先转换为灰度图再计算SSIM（AVG模式）
+    更关注图像整体结构相似性
+    """
+    y_pred = np.array(y_pred)
+    y_true = np.array(y_true)
+
+    # 如果是灰度图像（2维），则直接计算 SSIM
+    if y_true.ndim == 2 and y_pred.ndim == 2:
+        return calculate_ssim(y_true, y_pred)
+
+    # 如果是彩色图像（3维），则分通道计算 SSIM
+    if y_true.shape[2] != y_pred.shape[2]:
+        raise ValueError("输入图像的通道数不匹配")
+
+    ssim_channels = []
+    for i in range(y_true.shape[2]):
+        channel_true = y_true[:, :, i]
+        channel_pred = y_pred[:, :, i]
+
+        ssim = calculate_ssim(channel_true, channel_pred)
+        ssim_channels.append(ssim)
+
+    # 计算所有通道的平均 SSIM
+    return np.mean(ssim_channels)
+
+
+def ssim_gray(y_true, y_pred):
+    """
+    将图像转换为灰度图像后计算SSIM
+    不依赖外部库的实现
+    """
+    # 确保输入是numpy数组
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+
+    # 检测数据范围
+    max_pixel = max(y_true.max(), y_pred.max())
+    min_pixel = min(y_true.min(), y_pred.min())
+    data_range = max_pixel - min_pixel
+
+    # 如果数据范围很小或为0，使用默认范围255
+    if data_range < 1.0:
+        data_range = 255.0
+
+    # 转换为灰度图像
+    if y_true.ndim == 3 and y_true.shape[2] == 3:  # RGB图像
+        y_true = (0.299 * y_true[:, :, 0] + 0.587 * y_true[:, :, 1] + 0.114 * y_true[:, :, 2])
+    elif y_true.ndim == 3:  # 多通道非RGB
+        y_true = np.mean(y_true, axis=2)
+
+    if y_pred.ndim == 3 and y_pred.shape[2] == 3:  # RGB图像
+        y_pred = (0.299 * y_pred[:, :, 0] + 0.587 * y_pred[:, :, 1] + 0.114 * y_pred[:, :, 2])
+    elif y_pred.ndim == 3:  # 多通道非RGB
+        y_pred = np.mean(y_pred, axis=2)
+
+    # 确保是2D灰度图像
+    if y_true.ndim != 2 or y_pred.ndim != 2:
+        raise ValueError("灰度转换失败，结果是三维数组")
+
+    # 计算灰度图像的SSIM
+    return calculate_ssim(y_true, y_pred)
+# 统一入口函数（根据配置选择不同模式）
+def ssim(y_true, y_pred):
+    """主SSIM计算函数，根据全局配置选择算法"""
+    if SSIM_MODE == "rgb":
+        return ssim_rgb(y_true, y_pred)
+    elif SSIM_MODE == "avg":
+        return ssim_avg(y_true, y_pred)
+    elif SSIM_MODE == "gray":
+        return ssim_gray(y_true, y_pred)
+    else:
+        raise ValueError(f"无效的SSIM模式: {SSIM_MODE}. 请使用 'rgb' 或 'avg'或 'gray'")
+
 def calculate_ssim(y_true, y_pred):
     u_true = np.mean(y_true)
     u_pred = np.mean(y_pred)
@@ -104,7 +182,6 @@ def calculate_ssim(y_true, y_pred):
     ssim = (2 * u_true * u_pred + c1) * (2 * std_pred * std_true + c2)
     denom = (u_true ** 2 + u_pred ** 2 + c1) * (var_pred + var_true + c2)
     return ssim / denom
-
 
 
 def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005, scores_005, current_points,
@@ -779,7 +856,7 @@ def sixboxes_simulation(log_path, root_path):  # 模拟交互，3次加点，3�
                     log_file.write(f"Curr Errors #{i}: MAE={mean_mae}, MSE={mean_mse}, RMSE={mean_rmse}\n")
 
                 log_file.write(f"Processed images: {len(interinf)}\n")
-                log_file.write(f"Config: confidence_t={threshold}, ssim_mode=rgb, ssim_t={ssim_t}\n")
+                log_file.write(f"Config: confidence_t={threshold}, ssim_mode={SSIM_MODE}, ssim_t={ssim_t}\n")
 
                 log_file.write(
                     f"Del Times: Count={len(del_re_time)}, Max={np.max(del_re_time)}, Mean={np.mean(del_re_time)}\n")
@@ -938,7 +1015,7 @@ def sixboxes_simulation_PE(log_path, root_path):  # 模拟交互，3次加点，
                     log_file.write(f"Curr Errors #{i}: MAE={mean_mae}, MSE={mean_mse}, RMSE={mean_rmse}\n")
 
                 log_file.write(f"Processed images: {len(interinf)}\n")
-                log_file.write(f"Config: confidence_t={threshold}, ssim_mode=rgb, ssim_t={ssim_t}\n")
+                log_file.write(f"Config: confidence_t={threshold}, ssim_mode={SSIM_MODE}, ssim_t={ssim_t}\n")
 
                 # log_file.write(
                 #     f"Del Times: Count={len(del_re_time)}, Max={np.max(del_re_time)}, Mean={np.mean(del_re_time)}\n")
@@ -1097,7 +1174,7 @@ def sixboxes_simulation_PF(log_path, root_path):  # 模拟交互，3次加点，
                     log_file.write(f"Curr Errors #{i}: MAE={mean_mae}, MSE={mean_mse}, RMSE={mean_rmse}\n")
 
                 log_file.write(f"Processed images: {len(interinf)}\n")
-                log_file.write(f"Config: confidence_t={threshold}, ssim_mode=rgb, ssim_t={ssim_t}\n")
+                log_file.write(f"Config: confidence_t={threshold}, ssim_mode={SSIM_MODE}, ssim_t={ssim_t}\n")
 
                 log_file.write(
                     f"Del Times: Count={len(del_re_time)}, Max={np.max(del_re_time)}, Mean={np.mean(del_re_time)}\n")
@@ -1274,7 +1351,7 @@ def sixboxes_simulation_PE_PF(log_path, root_path):  # 模拟交互，3次加点
                     log_file.write(f"Curr Errors #{i}: MAE={mean_mae}, MSE={mean_mse}, RMSE={mean_rmse}\n")
 
                 log_file.write(f"Processed images: {len(interinf)}\n")
-                log_file.write(f"Config: confidence_t={threshold}, ssim_mode=rgb, ssim_t={ssim_t}\n")
+                log_file.write(f"Config: confidence_t={threshold}, ssim_mode={SSIM_MODE}, ssim_t={ssim_t}\n")
 
                 log_file.write(
                     f"Del Times: Count={len(del_re_time)}, Max={np.max(del_re_time)}, Mean={np.mean(del_re_time)}\n")
@@ -1302,13 +1379,25 @@ def get_args_parser():
 
 
 def main(args):
-    # 与交互式计数方法对比,初始预测模型选择训练20个epoch的
-    log_path = "/home/hp/zrj/prjs/AICC/interact_box_log_test192_box33.txt"  # 43090
-    root_path = '/home/hp/zrj/Data/NEFCell/DATA_ROOT/test'  # 43090
-    # sixboxes_simulation(log_path, root_path)
-    #sixboxes_simulation_PE(log_path, root_path)
-    sixboxes_simulation_PF(log_path, root_path)
-    #sixboxes_simulation_PE_PF(log_path, root_path)
+
+    # # 与交互式计数方法对比,初始预测模型选择训练20个epoch的
+    # log_path = "/home/hp/zrj/prjs/AICC/interact_box_log_test192_box33.txt"  # 43090
+    # root_path = '/home/hp/zrj/Data/NEFCell/DATA_ROOT/test'  # 43090
+    # # sixboxes_simulation(log_path, root_path)
+    # #sixboxes_simulation_PE(log_path, root_path)
+    # #sixboxes_simulation_PF(log_path, root_path)
+    # sixboxes_simulation_PE_PF(log_path, root_path)
+    ssim_t_values = [0.8]
+    log_path = "/home/hp/zrj/prjs/AICC/interact_box_log_test192_box33.txt"
+    root_path = '/home/hp/zrj/Data/NEFCell/DATA_ROOT/test'
+    for ssim_t in ssim_t_values:
+        print(f"\n{'=' * 50}")
+        print(f"Running simulations with ssim_t = {ssim_t}")
+        print(f"{'=' * 50}\n")
+
+        # 更新参数
+        args.ssim_t = ssim_t
+        sixboxes_simulation_PE_PF(log_path, root_path)
 
 
 if __name__ == '__main__':
