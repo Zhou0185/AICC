@@ -19,7 +19,7 @@ from sklearn.cluster import KMeans
 del_re_time = []
 add_time = []
 # 添加新的配置参数来控制SSIM模式
-SSIM_MODE = "rgb"  # 可设置为 "rgb" 或 "avg"或 "gray"
+SSIM_MODE = "gray"  # 可设置为 "rgb" 或 "avg"或 "gray"
 def DrawfPoints(points, Img_path):
         data = points
         llen = len(data)
@@ -619,7 +619,7 @@ def pointF1_score(TP,p_gt,p_prd):
     return F1s, Precision, Recall
 
 
-def adaptation_boxes(inf,model,device,transform,root_path,ssim_t, t_view, t_candidate, t_intensity):
+def adaptation_boxes(inf, model, device, transform, root_path, ssim_t, t_view, t_candidate, t_intensity, mode):
     #root_path = "/media/xdu/Data/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_64/DATA_ROOT/testval"  # 有gt 134
 
     Display_width = 640
@@ -721,52 +721,72 @@ def adaptation_boxes(inf,model,device,transform,root_path,ssim_t, t_view, t_cand
         #     (int(x1 * scale_x), int(y1 * scale_y), int(x2 * scale_x), int(y2 * scale_y))
         #     for (x1, y1, x2, y2) in coords
         # ]
-        if box_type == "add":
-            print(f"  {box_type} boxes: {coords}")
-            for box in coords:
-                img_n, current_count, current_points,current_scores = \
-                    interactive_adaptation_boxs_add(img_n, box,
-                                                    img_path, points_005, scores_005,
-                                                    current_points,current_scores,
-                                                    Display_width, Display_height,
-                                                    image_width, image_height,
-                                                    ssim_t=ssim_t,t_intensity=t_intensity)
-                #draw.rectangle(box, outline="white", width=3)
-                # img_n, current_count, current_points, current_scores \
-                #     = interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX_ori_add_list[i],
-                #                                       Image_path, points_005, scores_005, current_points,
-                #                                       current_scores,
-                #                                       Display_width, Display_height,
-                #                                       Image_Ori_W, Image_Ori_H,
-                #                                       ssim_t)
-        if box_type == "del_re":
-            print(f"  {box_type} boxes: {coords}")
-            for box in coords:
-                img_n, current_count, current_points,current_scores = \
-                    interactive_adaptation_boxs_del(img_n, box,
-                                                    img_path, points_005, scores_005,
-                                                    current_points,current_scores,
-                                                    Display_width, Display_height,
-                                                    image_width, image_height,
-                                                    ssim_t=ssim_t)
-                #draw.rectangle(box, outline="red", width=3)
-                # img_n, current_count, current_points, current_scores \
-                #     = interactive_adaptation_boxs_del(img_n, EXEMPLAR_BBX_ori_del_list[i],
-                #                                       Image_path, points_005, scores_005, current_points,
-                #                                       current_scores,
-                #                                       Display_width, Display_height,
-                #                                       Image_Ori_W, Image_Ori_H,
-                #                                       ssim_t)
-        if box_type == "del_all":
-            print(f"  {box_type} boxes: {coords}")
-            for box in coords:
-                img_n, current_count, current_points,current_scores = \
-                    interactive_adaptation_boxs_del_all(img_n, box,
+        if mode == 'PE':
+            # PE模式只执行add操作
+            if box_type == "add":
+                print(f"  {box_type} boxes: {coords}")
+                for box in coords:
+                    img_n, current_count, current_points, current_scores = \
+                        interactive_adaptation_boxs_add(img_n, box,
                                                         img_path, points_005, scores_005,
-                                                        current_points,current_scores,
+                                                        current_points, current_scores,
                                                         Display_width, Display_height,
                                                         image_width, image_height,
-                                                    ssim_t=ssim_t)
+                                                        ssim_t=ssim_t, t_intensity=t_intensity)
+        elif mode == 'PF':
+            # PF模式只执行del_re和del_all操作
+            if box_type == "del_re":
+                print(f"  {box_type} boxes: {coords}")
+                for box in coords:
+                    img_n, current_count, current_points, current_scores = \
+                        interactive_adaptation_boxs_del(img_n, box,
+                                                        img_path, points_005, scores_005,
+                                                        current_points, current_scores,
+                                                        Display_width, Display_height,
+                                                        image_width, image_height,
+                                                        ssim_t=ssim_t)
+            elif box_type == "del_all":
+                print(f"  {box_type} boxes: {coords}")
+                for box in coords:
+                    img_n, current_count, current_points, current_scores = \
+                        interactive_adaptation_boxs_del_all(img_n, box,
+                                                            img_path, points_005, scores_005,
+                                                            current_points, current_scores,
+                                                            Display_width, Display_height,
+                                                            image_width, image_height,
+                                                            ssim_t=ssim_t)
+        elif mode == 'PE_PF':
+            # PE_PF模式执行所有三种操作
+            if box_type == "add":
+                print(f"  {box_type} boxes: {coords}")
+                for box in coords:
+                    img_n, current_count, current_points, current_scores = \
+                        interactive_adaptation_boxs_add(img_n, box,
+                                                        img_path, points_005, scores_005,
+                                                        current_points, current_scores,
+                                                        Display_width, Display_height,
+                                                        image_width, image_height,
+                                                        ssim_t=ssim_t, t_intensity=t_intensity)
+            elif box_type == "del_re":
+                print(f"  {box_type} boxes: {coords}")
+                for box in coords:
+                    img_n, current_count, current_points, current_scores = \
+                        interactive_adaptation_boxs_del(img_n, box,
+                                                        img_path, points_005, scores_005,
+                                                        current_points, current_scores,
+                                                        Display_width, Display_height,
+                                                        image_width, image_height,
+                                                        ssim_t=ssim_t)
+            elif box_type == "del_all":
+                print(f"  {box_type} boxes: {coords}")
+                for box in coords:
+                    img_n, current_count, current_points, current_scores = \
+                        interactive_adaptation_boxs_del_all(img_n, box,
+                                                            img_path, points_005, scores_005,
+                                                            current_points, current_scores,
+                                                            Display_width, Display_height,
+                                                            image_width, image_height,
+                                                            ssim_t=ssim_t)
                 #draw.rectangle(box, outline="blue", width=3)
     #image.show()
     #img_n.save("box_"+img_name)
@@ -804,7 +824,7 @@ def adaptation_boxes(inf,model,device,transform,root_path,ssim_t, t_view, t_cand
     print("F1point_score_cur{},Precision_score_cur{},Recall_score_cur{}".format(F1point_score_cur,Precision_score_cur,Recall_score_cur))
     return mae_ori,mse_ori,F1point_score_ori,Precision_score_ori,Recall_score_ori,mae_cur,mse_cur,F1point_score_cur,Precision_score_cur,Recall_score_cur
 
-def threeboxes_simulation(model, device, transform, args, log_path, root_path, ssim_t, t_view, t_candidate, t_intensity):#用户真实交互，有三种交互，0-2次
+def threeboxes_simulation(model, device, transform, args, log_path, root_path, ssim_t, t_view, t_candidate, t_intensity, mode):#用户真实交互，有三种交互，0-2次
     # model, device, transform,args = p2p_init_visual_counter()
     #ssim_t = args.ssim_t
     maes_ori, mses_ori = [], []
@@ -854,7 +874,7 @@ def threeboxes_simulation(model, device, transform, args, log_path, root_path, s
 
                 mae_ori, mse_ori, F1point_score_ori, Precision_score_ori, Recall_score_ori, \
                 mae_cur, mse_cur, F1point_score_cur, Precision_score_cur, Recall_score_cur = \
-                    adaptation_boxes(boxes, model, device, transform, root_path, ssim_t, t_view, t_candidate, t_intensity)
+                    adaptation_boxes(boxes, model, device, transform, root_path, ssim_t, t_view, t_candidate, t_intensity,mode)
 
                 m_F1point_scores_ori.append(F1point_score_ori)
                 m_Precision_scores_ori.append(Precision_score_ori)
@@ -893,7 +913,8 @@ def threeboxes_simulation(model, device, transform, args, log_path, root_path, s
                        f"ssim_t={ssim_t}, "
                        f"t_view={t_view}, "
                        f"t_candidate={t_candidate},"
-                       f"t_intensity={t_intensity}\n")
+                       f"t_intensity={t_intensity},"
+                       f"mode={mode}\n")  # 添加模式参数
 
         # 单行记录原始模型性能指标
         log_file.write(
@@ -958,14 +979,14 @@ def get_args_parser():
 
     parser.add_argument('--t_candidate_start', default=0.01, type=float,
                         help="Start value for t_candidate range")
-    parser.add_argument('--t_candidate_end', default=0.1, type=float,
+    parser.add_argument('--t_candidate_end', default=0.25, type=float,
                         help="End value for t_candidate range")
-    parser.add_argument('--t_candidate_step', default=0.01, type=float,
+    parser.add_argument('--t_candidate_step', default=0.04, type=float,
                         help="Step size for t_candidate range")
     # 添加新的强度阈值参数
-    parser.add_argument('--t_intensity_start', default=0, type=float,
+    parser.add_argument('--t_intensity_start', default=5, type=float,
                         help="Start value for t_candidate range")
-    parser.add_argument('--t_intensity_end', default=50, type=float,
+    parser.add_argument('--t_intensity_end', default=40, type=float,
                         help="End value for t_candidate range")
     parser.add_argument('--t_intensity_step', default=5, type=float,
                         help="Step size for t_candidate range")
@@ -976,6 +997,10 @@ def main(args):
     #与非交互式计数方法对比,初始预测模型选择训练1500个epoch的
     log_path = '/home/hp/zrj/prjs/AICC/interact_box_log_test192.txt'
     root_path = '/home/hp/zrj/Data/NEFCell/DATA_ROOT/test'  # 43090
+    # 定义要测试的模式列表
+    modes = ['PE', 'PF', 'PE_PF']
+    mode = 'PE_PF'
+
     # 创建SSIM阈值范围
     ssim_t_values = np.arange(
         args.ssim_t_start,
@@ -993,6 +1018,9 @@ def main(args):
         args.t_candidate_end + args.t_candidate_step,
         args.t_candidate_step
     )
+    # t_candidate_values = [0.01, 0.05, 0.1, 0.15, 0.20, 0.25, 0.3,0.35,0.4,0.45,0.5]
+    t_candidate_values = [0.05]
+
     t_intensity_values = np.arange(
         args.t_intensity_start,
         args.t_intensity_end + args.t_intensity_step,
@@ -1015,25 +1043,37 @@ def main(args):
     #     print(f"{'=' * 50}")
     #     # 修改SSIM阈值并运行测试
     #     threeboxes_simulation(model, device, transform, args, log_path, root_path, ssim_t, t_view, t_candidate, t_intensity)
-    # ssim_t=0.8
-    # t_view=0.5
-    # t_intensity=20
-    # for t_candidate in t_candidate_values:
-    #     print(f"\n{'=' * 50}")
-    #     print(f"Testing with t_candidate threshold: {t_candidate:.2f}")
-    #     print(f"{'=' * 50}")
-    #     # 修改SSIM阈值并运行测试
-    #     threeboxes_simulation(model, device, transform, args, log_path, root_path, ssim_t, t_view, t_candidate, t_intensity)
     ssim_t=0.8
     t_view=0.5
-    t_candidate = 0.05
-    for t_intensity in t_intensity_values:
+    t_intensity=20
+    for t_candidate in t_candidate_values:
         print(f"\n{'=' * 50}")
-        print(f"Testing with t_intensity threshold: {t_intensity:.2f}")
+        print(f"Testing with t_candidate threshold: {t_candidate}")
         print(f"{'=' * 50}")
         # 修改SSIM阈值并运行测试
-        threeboxes_simulation(model, device, transform, args, log_path, root_path, ssim_t, t_view, t_candidate, t_intensity)
-
+        threeboxes_simulation(model, device, transform, args, log_path, root_path,
+                          ssim_t, t_view, t_candidate, t_intensity, mode)
+    # ssim_t=0.8
+    # t_view=0.5
+    # t_candidate = 0.05
+    # for t_intensity in t_intensity_values:
+    #     print(f"\n{'=' * 50}")
+    #     print(f"Testing with t_intensity threshold: {t_intensity:.2f}")
+    #     print(f"{'=' * 50}")
+    #     # 修改SSIM阈值并运行测试
+    #     threeboxes_simulation(model, device, transform, args, log_path, root_path,
+    #                           ssim_t, t_view, t_candidate, t_intensity, mode)
+    # ssim_t=0.8
+    # t_view=0.5
+    # t_candidate = 0.05
+    # t_intensity = 20
+    # for mode in modes:
+    #     print(f"\n{'=' * 50}")
+    #     print(f"Testing with mode: {mode}")
+    #     print(f"{'=' * 50}")
+    #     # 修改SSIM阈值并运行测试
+    #     threeboxes_simulation(model, device, transform, args, log_path, root_path,
+    #                           ssim_t, t_view, t_candidate, t_intensity, mode)
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('P2PNet_simulation', parents=[get_args_parser()])
     args = parser.parse_args()

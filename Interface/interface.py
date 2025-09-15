@@ -2,10 +2,13 @@ import argparse
 import os
 # import pdb
 import time
+from random import random
+
 import cv2
 import tkinter as tk
 import sys
 sys.path.append('/home/hp/zrj/prjs/AICC')  # 43
+sys.path.append('/home/hp/zrj/prjs/AICC/models')
 from models import build_model
 import torchvision.transforms as standard_transforms
 from sklearn.cluster import KMeans
@@ -85,6 +88,7 @@ class AICCInterface(tk.Tk):
         self.init_exemplar_area()
         self.init_menu_bar()
         self.init_visual_counter()
+        #self.APGCC_init_visual_counter()
         self.init_popup_menu()
         ##
         self.sizedpoints = []
@@ -116,8 +120,8 @@ class AICCInterface(tk.Tk):
                                 help='path where to save')
             parser.add_argument('--test_output_dir', default='/home/hp/zrj/prjs/AICC/output',
                                 help='path where to save')  # 4_32
-            parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/CELLSsplit_v4_best_e20.pth',
-                                help='path where the trained weights saved')  # 4_32服务器
+            parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/BCData_e1500_best.pth',
+                                help='path where the trained weights saved')  # 3服务器
             # parser.add_argument('--weight_path', default='/mnt/data/zrj/Mymodel/CELLSsplit_v4_best_e1500.pth',
             #                     help='path where the trained weights saved')  # 4_32服务器
 
@@ -154,6 +158,156 @@ class AICCInterface(tk.Tk):
             # convert to eval mode
             model.eval()
         self.visual_counter = model
+    def APGCC_init_visual_counter(self):
+        print("APGCC_init_visual_counter")
+        if torch.cuda.is_available():
+            self.device = "cuda:0"
+            print(self.device, '-------')
+        else:
+            self.device = 'cpu'
+            print('cpu-------')
+
+        def get_apgcc_args_parser():
+
+            """
+            为加载 APGCC 模型设置参数解析器。
+            这个函数只定义参数，并返回 parser 对象。
+            """
+            #from config import cfg
+            parser = argparse.ArgumentParser('APGCC_simulation')
+            # * Backbone
+            parser.add_argument('--backbone', default='vgg16_bn', type=str,
+                                help="name of the convolutional backbone to use")
+            parser.add_argument('--row', default=2, type=int,
+                                help="row number of anchor points")
+            parser.add_argument('--line', default=2, type=int,
+                                help="line number of anchor points")
+            parser.add_argument('--output_dir', default='vis',
+                                help='path where to save')
+            parser.add_argument('--test_output_dir', default='/home/hp/zrj/prjs/AICC/output',
+                                help='path where to save')  # 4_32
+            parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/APGCC_NEFCell_best_e3500.pth',
+                                help='path where the trained weights saved')  # 3服务器
+            # parser.add_argument('--weight_path', default='/mnt/data/zrj/Mymodel/CELLSsplit_v4_best_e1500.pth',
+            #                     help='path where the trained weights saved')  # 4_32服务器
+
+            # CELLSsplitlatest1024b8e2000 CELLSlatestb8e2000 Cellsplitv3lastb4e2000.pth
+            # parser.add_argument('--gpu_id', default=0, type=int, help='the gpu used for evaluation')
+            parser.add_argument('--gpu_id', default=0, type=int, help='the gpu used for evaluation')
+
+            # --- APGCC 特有的配置参数 ---
+            # APGCC 主要通过一个 .yml 配置文件来管理参数
+            parser.add_argument('-c', '--config_file', type=str,
+                                default="/home/hp/zrj/prjs/APGCC-main/apgcc/configs/AICC_test.yml",
+                                help='The path to the APGCC config file')
+
+            # 允许从命令行覆盖配置文件中的参数
+            parser.add_argument('opts', help='Overwriting the training config from commandline',
+                                default=None, nargs=argparse.REMAINDER)
+
+            # --- 你的模拟脚本需要的自定义参数 ---
+            # parser.add_argument('--ssim_t_start', default=0.8, type=float,
+            #                     help="start value for ssim threshold range")
+            # parser.add_argument('--ssim_t_end', default=0.8, type=float,
+            #                     help="end value for ssim threshold range")
+            # parser.add_argument('--ssim_t_step', default=0.1, type=float,
+            #                     help="step size for ssim threshold range")
+            #
+            # parser.add_argument('--t_view_start', default=0.5, type=float,
+            #                     help="Start value for t_view range")
+            # parser.add_argument('--t_view_end', default=0.5, type=float,
+            #                     help="End value for t_view range")
+            # parser.add_argument('--t_view_step', default=0.1, type=float,
+            #                     help="Step size for t_view range")
+            #
+            # parser.add_argument('--t_candidate_start', default=0.05, type=float,
+            #                     help="Start value for t_candidate range")
+            # parser.add_argument('--t_candidate_end', default=0.05, type=float,
+            #                     help="End value for t_candidate range")
+            # parser.add_argument('--t_candidate_step', default=0.04, type=float,
+            #                     help="Step size for t_candidate range")
+            #
+            # parser.add_argument('--t_intensity_start', default=20, type=float,
+            #                     help="Start value for t_intensity range")
+            # parser.add_argument('--t_intensity_end', default=20, type=float,
+            #                     help="End value for t_intensity range")
+            # parser.add_argument('--t_intensity_step', default=5, type=float,
+            #                     help="Step size for t_intensity range")
+
+            return parser
+        # 1. 获取定义好的解析器
+        parser = get_apgcc_args_parser()
+
+        # 2. 执行解析，这是整个脚本中唯一一次调用 parse_args
+        args = parser.parse_args()
+        # parser = argparse.ArgumentParser('APGCC evaluation script', parents=[get_apgcc_args_parser])
+        # args = parser.parse_args()
+        # print(args)
+        self.run_log_name = os.path.join(args.test_output_dir, 'interact_log.txt')
+        self.run_log_name_add = os.path.join(args.test_output_dir, 'interact_add_log.txt')
+        self.run_log_name_del = os.path.join(args.test_output_dir, 'interact_del_log.txt')
+        self.run_log_name_box = os.path.join(args.test_output_dir, 'interact_box_log.txt')
+        print(self.run_log_name)
+        with open(self.run_log_name, "a") as log_file:  # 记录计数用的模型pth等信息
+            log_file.write('\nEval Log %s\n' % time.strftime("%c"))
+            log_file.write("{}".format(args))
+        with open(self.run_log_name_box, "a") as log_file:  # 记录计数用的模型pth等信息
+            log_file.write('\nEval Log %s\n' % time.strftime("%c"))
+            log_file.write("{}".format(args))
+        # device = torch.device('cuda')
+        device = torch.device(self.device)
+        # get the P2PNet
+        # 导入 APGCC 的配置管理工具
+        from methods.apgcc.config import cfg, merge_from_file, merge_from_list
+
+
+
+        # 3. 加载 APGCC 的配置文件 (这是 APGCC 的标准流程)
+        if args.config_file != "":
+            cfg = merge_from_file(cfg, args.config_file)
+        if args.opts is not None:
+            cfg = merge_from_list(cfg, args.opts)
+
+        # 4. 设置设备
+        device = torch.device('cuda:{}'.format(cfg.GPU_ID))
+        os.environ["CUDA_VISIBLE_DEVICES"] = '{}'.format(cfg.GPU_ID)
+
+        # (可选) 设置随机种子以保证可复现性
+        # seed = cfg.SEED
+        # if seed is not None:
+        #     random.seed(seed)
+        #     np.random.seed(seed)
+        #     torch.manual_seed(seed)
+        #     torch.cuda.manual_seed_all(seed)
+
+        # 5. 构建模型架构 (APGCC 的 build_model 需要 cfg 对象)
+        # 确保你已经正确导入了 APGCC 的 build_model: from models import build_model
+        from methods.apgcc.models import build_model
+        model = build_model(cfg=cfg, training=False)
+        model.to(device)
+
+        # 6. 加载预训练权重 (APGCC 的方式)
+        pretrained_dict = torch.load(os.path.join("/home/hp/zrj/prjs/pth", 'APGCC_NEFCell_best_e3500.pth'),
+                                     map_location='cpu')
+        # pretrained_dict = torch.load(os.path.join(source_dir, 'SHHA_best.pth'), map_location='cpu')
+        model_dict = model.state_dict()
+        param_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict.keys()}
+        model_dict.update(param_dict)
+        model.load_state_dict(model_dict)
+        # 7. 切换到评估模式
+        model.eval()
+        # model = build_model(args)
+        # # move to GPU
+        # model.to(device)
+        # # load trained model
+        # if args.weight_path is not None:
+        #     checkpoint = torch.load(args.weight_path, map_location='cpu')
+        #     model.load_state_dict(checkpoint['model'])
+        #     # convert to eval mode
+        #     model.eval()
+        self.visual_counter = model
+
+
 
     def initial_count(self):
         if self.Image_path is None:
@@ -184,6 +338,8 @@ class AICCInterface(tk.Tk):
         # print(samples.shape)
         # run inference
         outputs, self.simifeat = self.visual_counter(samples)  # return out,features_fpn[1]
+        #outputs = self.visual_counter(samples)  # return out,features_fpn[1]
+
         outputs_scores = torch.nn.functional.softmax(outputs['pred_logits'], -1)[:, :, 1][0]  # [:, :, 1][0]为错误点的概率
         outputs_points = outputs['pred_points'][0]
         self.inter_outputs_scores = outputs_scores
@@ -191,9 +347,9 @@ class AICCInterface(tk.Tk):
 
         # self.visual_counter.reset_refinement_module(self.simifeat.shape[-2], self.simifeat.shape[
         #     -1])  # 设置细化模块（空间细化）参数的形状，形状由 self.features 的倒数第二个和最后一个维度确定。n
-        self.visual_counter.classification.reset_refinement_module(self.simifeat.shape[-2], self.simifeat.shape[
-            -1])  # 设置细化模块（空间细化）参数的形状，形状由 self.features 的倒数第二个和最后一个维度确定。n
-        self.visual_counter.to(self.device)
+        # self.visual_counter.classification.reset_refinement_module(self.simifeat.shape[-2], self.simifeat.shape[
+        #     -1])  # 设置细化模块（空间细化）参数的形状，形状由 self.features 的倒数第二个和最后一个维度确定。n
+        # self.visual_counter.to(self.device)
         # threshold = 0.8
         # allpoints = outputs_points[outputs_scores > 0.05].detach().cpu().numpy().tolist()
         self.threshold = 0.5
@@ -433,11 +589,12 @@ class AICCInterface(tk.Tk):
         # The only important para
         # self.Image_path = filedialog.askopenfilename(initialdir="./", title="Select image.")
         self.Image_path = filedialog.askopenfilename(
-            initialdir="/mnt/disk3/zrj/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v4/DATA_ROOT/test/images",
+            initialdir="/home/hp/zrj/prjs/MYP2PNET_ROOT/crowd_datasets/BC_DATASET/DATA_ROOT/test/images",
             title="Select image.")
         img_open = Image.open(self.Image_path)
         self.Image_name = self.Image_path.split("/")[-1].split(".")[0]
-        gt_path = self.Image_path.replace("images", "test_file").replace(".tif", ".txt")
+        #gt_path = self.Image_path.replace("images", "test_file").replace(".tif", ".txt")
+        gt_path = self.Image_path.replace("images", "test_file").replace(".png", ".txt")
         print(gt_path)
         if os.path.exists(gt_path):
             self.Gt_path = gt_path

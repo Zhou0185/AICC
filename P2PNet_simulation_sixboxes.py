@@ -18,7 +18,7 @@ from sklearn.cluster import KMeans
 # pdb.set_trace()
 del_re_time = []
 add_time = []
-SSIM_MODE = "gray"  # 可设置为 "rgb" 或 "avg"或 "gray"
+SSIM_MODE = "avg"  # 可设置为 "rgb" 或 "avg"或 "gray"
 
 def DrawfPoints(points, Img_path):
     data = points
@@ -184,12 +184,10 @@ def calculate_ssim(y_true, y_pred):
     return ssim / denom
 
 
-def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005, scores_005, current_points,
-                                    current_scores,
-                                    Display_width, Display_height, Image_Ori_W, Image_Ori_H, ssim_t=0.5):
+def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,scores_005, current_points,current_scores,
+                                    Display_width, Display_height, Image_Ori_W, Image_Ori_H, ssim_t=0.5, t_intensity=20):
     """Add points interactively within specified bounding boxes."""
     start = time.time()
-
     def resize_points(points):
         """Resize points to match display dimensions."""
         return [
@@ -232,10 +230,12 @@ def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,
     y_min, y_max = min(EXEMPLAR_BBX[1], EXEMPLAR_BBX[3]), max(EXEMPLAR_BBX[1], EXEMPLAR_BBX[3])
     x_len, y_len = x_max - x_min, y_max - y_min
 
+
+
     input_image = Image.open(Image_path).resize((Display_width, Display_height))
     # plt.imshow(input_image)
     # plt.imsave("input_image.png", input_image)
-    # plt.show()  # 显示图片
+    #plt.show()  # 显示图片
     # 检查裁剪区域是否有效
     # print(crop_area_base)
     # x_min, y_min, x_max, y_max = crop_area_base
@@ -256,20 +256,20 @@ def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,
     # plt.imshow(crop_img_base_rgb, vmin=0, vmax=255)  # 假设像素值范围是 [0, 255]
     # plt.imsave("crop_img_base_rgb.png", crop_img_base_rgb)
     # plt.show()
-    # rgb
+    #rgb
     # 将图像转换为 numpy 数组并展平
     crop_img_base_rgb_array = np.array(crop_img_base_rgb)
     # 将图像展平成 (num_pixels, 3) 的二维数组，每行代表一个像素的 RGB 值
     pixels_rgb = crop_img_base_rgb_array.reshape(-1, 3)
 
     # 检查数据中的独特点
-    # unique_points = np.unique(pixels_rgb, axis=0)
-    # print("Unique points:", unique_points)
+    #unique_points = np.unique(pixels_rgb, axis=0)
+    #print("Unique points:", unique_points)
     # 根据独特点数量设置 n_clusters
-    # nn_clusters = len(unique_points)
-    # print("nn_clusters",nn_clusters)
+    #nn_clusters = len(unique_points)
+    #print("nn_clusters",nn_clusters)
     # 使用 K-means 进行聚类，将图像分为两类（细胞和背景）
-    # kmeans_rgb = KMeans(n_clusters=n_clusters, random_state=0, n_init=10).fit(pixels_rgb)
+    #kmeans_rgb = KMeans(n_clusters=n_clusters, random_state=0, n_init=10).fit(pixels_rgb)
     kmeans_rgb = KMeans(n_clusters=2, random_state=0).fit(pixels_rgb)
     # kmeans_rgb = KMeans(n_clusters=2, random_state=0, n_init='auto').fit(pixels_rgb)
     # 获取聚类标签（0 或 1），每个标签对应一个类
@@ -292,12 +292,12 @@ def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,
     mask = (labels_rgb_image == cell_label).astype(np.uint8)
     # 提取细胞部分和背景部分的像素
     cell_pixels = crop_img_base_rgb_array[mask == 1]
-    # background_pixels = crop_img_base_rgb_array[mask == 0]
+    #background_pixels = crop_img_base_rgb_array[mask == 0]
     # 计算细胞部分和背景部分的平均像素值
     average_cell_pixel = np.mean(cell_pixels.mean(axis=0))
-    # average_background_pixel = background_pixels.mean(axis=0)
+    #average_background_pixel = background_pixels.mean(axis=0)
     # 计算背景和细胞的平均像素差值
-    # average_pixel_diff = np.mean(np.abs(average_cell_pixel - average_background_pixel))
+    #average_pixel_diff = np.mean(np.abs(average_cell_pixel - average_background_pixel))
 
     # Resize points
     resized_points = resize_points(points_005)
@@ -322,11 +322,11 @@ def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,
         point[0] = min(point[0], Display_width - 1)
         point[1] = min(point[1], Display_height - 1)
         current_pixel = np.mean(img_array[points_raw[i][1]][points_raw[i][0]])  # ---注意翻一下横纵坐标
-        # current_pixel = img_array[point[1]][point[0]]
+        #current_pixel = img_array[point[1]][point[0]]
         # if current_pixel < max_pixel // 2:
         #     continue
-        # if (abs(current_pixel - average_cell_pixel) > 8):
-        if (abs(current_pixel - average_cell_pixel) > 20):
+        #if (abs(current_pixel - average_cell_pixel) > 8):
+        if (abs(current_pixel - average_cell_pixel) > t_intensity):
             # print("点像素与细胞像素差距过大。point's pixel likes background,continue ", "该点的像素值:", current_pixel,
             #       " 目标参考像素值average_cell_pixel：", average_cell_pixel)
             continue
@@ -347,7 +347,7 @@ def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,
             n_x_min, n_x_max = point[0] - x_len // 2, point[0] + x_len // 2
             n_y_min, n_y_max = point[1] - y_len // 2, point[1] + y_len // 2
             crop_area = (n_x_min, n_y_min, n_x_max, n_y_max)
-            # crop_img = input_image.crop(crop_area).convert('L')
+            #crop_img = input_image.crop(crop_area).convert('L')
             crop_img = input_image.copy().crop(crop_area).convert('RGB')
 
             if crop_img.size != crop_img_base_rgb.size:
@@ -355,9 +355,9 @@ def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,
 
             s_score = ssim(crop_img, crop_img_base_rgb)
             if s_score < ssim_t:
-                # print("图像ssim相似度:", s_score, " 跳过")
+                #print("图像ssim相似度:", s_score, " 跳过")
                 continue
-            # print("图像ssim相似度:", s_score, " 不跳过")
+            #print("图像ssim相似度:", s_score, " 不跳过")
             # Mark points within the bounding box as selected
             for pt in points_raw_copy:
                 if (n_x_min < int(pt[0]) < n_x_max and n_y_min < int(pt[1]) < n_y_max):
@@ -367,12 +367,12 @@ def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,
             current_scores_copy.append(scores_005[i])
             img_n = draw_point(points_raw, i, img_n)
     end = time.time()
-    # print("adapative time:", end - start)
-    add_time.append(end - start)
+    #print("adapative time:", end - start)
+    add_time.append(end-start)
     # Draw bounding box on the image
     draw = ImageDraw.Draw(img_n)
     draw.rectangle(EXEMPLAR_BBX, outline='red', width=2)
-    return img_n, len(current_points_copy), current_points_copy, current_scores_copy
+    return img_n, len(current_points_copy), current_points_copy,current_scores_copy
 
 
 def interactive_adaptation_boxs_del(img_n, EXEMPLAR_BBX, Image_path, points_005, scores_005, current_points,
@@ -618,7 +618,7 @@ def pointF1_score(TP, p_gt, p_prd):
     return F1s, Precision, Recell
 
 
-def dataplot_v3_drawbox_3_3(inf, model, device, transform, root_path):
+def dataplot_v3_drawbox_3_3(inf, model, device, transform, root_path, t_view, t_candidate):
     root_path = root_path
     # root_path = "/mnt/disk3/zrj/MyDatas/CELLSsplit_v4/DATA_ROOT/test"#有gt 43090
     Display_width = 640
@@ -653,10 +653,10 @@ def dataplot_v3_drawbox_3_3(inf, model, device, transform, root_path):
     outputs, simifeat = model(samples)  # 原文是outputs = model(samples)，但改了p2pnet的forward的return
     outputs_points = outputs['pred_points'][0]
     outputs_scores = torch.nn.functional.softmax(outputs['pred_logits'], -1)[:, :, 1][0]  # [:, :, 1][0]为错误点的概率
-    points_05 = outputs_points[outputs_scores > threshold].detach().cpu().numpy().tolist()
-    points_005 = outputs_points[outputs_scores > 0.05].detach().cpu().numpy().tolist()
-    scores_05 = outputs_scores[outputs_scores > 0.5].detach().cpu().numpy().tolist()
-    scores_005 = outputs_scores[outputs_scores > 0.05].detach().cpu().numpy().tolist()
+    points_05 = outputs_points[outputs_scores > t_view].detach().cpu().numpy().tolist()
+    points_005 = outputs_points[outputs_scores > t_candidate].detach().cpu().numpy().tolist()
+    scores_05 = outputs_scores[outputs_scores > t_view].detach().cpu().numpy().tolist()
+    scores_005 = outputs_scores[outputs_scores > t_candidate].detach().cpu().numpy().tolist()
 
     img_ini = DrawfPoints(points_05, Image_path)
     img_ini = Image.fromarray(np.uint8(img_ini))
@@ -862,13 +862,15 @@ def sixboxes_simulation(log_path, root_path):  # 模拟交互，3次加点，3�
                     f"Del Times: Count={len(del_re_time)}, Max={np.max(del_re_time)}, Mean={np.mean(del_re_time)}\n")
                 log_file.write(
                     f"Add Times: Count={len(add_time)}, Max={np.max(add_time)}, Mean={np.mean(add_time)}\n")
-def sixboxes_simulation_PE(log_path, root_path):  # 模拟交互，3次加点，3次删除重复点
+def sixboxes_simulation_PE(log_path, root_path, model, device, transform, args):  # 模拟交互，3次加点，3次删除重复点
     # log_path = "/mnt/disk3/zrj/PICACount/interact_box_log_Cellsplitv4lastb4e6交互_box33.txt"#43090
     log_path = log_path
     # root_path = "/media/xd/zrj/Prjs/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v3/DATA_ROOT/test"
-    model, device, transform, args = p2p_init_visual_counter()
+    #model, device, transform, args = p2p_init_visual_counter()
     ssim_t = args.ssim_t
-
+    t_intensity = args.t_intensity  # 获取当前强度值
+    t_candidate = args.t_candidate  # 固定候选值
+    t_view = args.t_view
     def ReSizedPoints(points):
         resizedpoints = []
         data = points
@@ -895,7 +897,7 @@ def sixboxes_simulation_PE(log_path, root_path):  # 模拟交互，3次加点，
             for inf in interinf:
                 EXEMPLAR_BBX_ori_add_list, EXEMPLAR_BBX_ori_del_list, points_05, points_005, scores_05, scores_005, p_gt, \
                 img_n, Image_path, Display_width, Display_height, Image_Ori_W, Image_Ori_H \
-                    = dataplot_v3_drawbox_3_3(inf, model, device, transform, root_path)
+                    = dataplot_v3_drawbox_3_3(inf, model, device, transform, root_path, t_view, t_candidate)
                 # 创建包含所有框的统一列表
                 all_boxes = []
                 for i in range(len(EXEMPLAR_BBX_ori_add_list)):
@@ -936,7 +938,7 @@ def sixboxes_simulation_PE(log_path, root_path):  # 模拟交互，3次加点，
                                                           current_scores,
                                                           Display_width, Display_height,
                                                           Image_Ori_W, Image_Ori_H,
-                                                          ssim_t)
+                                                          ssim_t,t_intensity)
                     print("initial_count, add_current_count:", initial_count, current_count)
                     # img_n, current_count, current_points, current_scores \
                     #     = interactive_adaptation_boxs_del(img_n, EXEMPLAR_BBX_ori_del_list[i],
@@ -1016,7 +1018,7 @@ def sixboxes_simulation_PE(log_path, root_path):  # 模拟交互，3次加点，
 
                 log_file.write(f"Processed images: {len(interinf)}\n")
                 log_file.write(f"Config: confidence_t={threshold}, ssim_mode={SSIM_MODE}, ssim_t={ssim_t}\n")
-
+                log_file.write(f"\nSummary for t_intensity={t_intensity}, t_candidate={t_candidate}, t_view={t_view}:\n")
                 # log_file.write(
                 #     f"Del Times: Count={len(del_re_time)}, Max={np.max(del_re_time)}, Mean={np.mean(del_re_time)}\n")
                 log_file.write(
@@ -1027,7 +1029,9 @@ def sixboxes_simulation_PF(log_path, root_path):  # 模拟交互，3次加点，
     # root_path = "/media/xd/zrj/Prjs/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v3/DATA_ROOT/test"
     model, device, transform, args = p2p_init_visual_counter()
     ssim_t = args.ssim_t
-
+    t_intensity = args.t_intensity  # 获取当前强度值
+    t_candidate = args.t_candidate  # 固定候选值
+    t_view = args.t_view
     def ReSizedPoints(points):
         resizedpoints = []
         data = points
@@ -1054,7 +1058,7 @@ def sixboxes_simulation_PF(log_path, root_path):  # 模拟交互，3次加点，
             for inf in interinf:
                 EXEMPLAR_BBX_ori_add_list, EXEMPLAR_BBX_ori_del_list, points_05, points_005, scores_05, scores_005, p_gt, \
                 img_n, Image_path, Display_width, Display_height, Image_Ori_W, Image_Ori_H \
-                    = dataplot_v3_drawbox_3_3(inf, model, device, transform, root_path)
+                    = dataplot_v3_drawbox_3_3(inf, model, device, transform, root_path, t_view, t_candidate)
                 # 创建包含所有框的统一列表
                 all_boxes = []
                 for i in range(len(EXEMPLAR_BBX_ori_add_list)):
@@ -1186,7 +1190,9 @@ def sixboxes_simulation_PE_PF(log_path, root_path):  # 模拟交互，3次加点
     # root_path = "/media/xd/zrj/Prjs/MYP2PNET_ROOT/crowd_datasets/CELLSsplit_v3/DATA_ROOT/test"
     model, device, transform, args = p2p_init_visual_counter()
     ssim_t = args.ssim_t
-
+    t_intensity = args.t_intensity  # 获取当前强度值
+    t_candidate = args.t_candidate  # 固定候选值
+    t_view = args.t_view
     def ReSizedPoints(points):
         resizedpoints = []
         data = points
@@ -1213,7 +1219,7 @@ def sixboxes_simulation_PE_PF(log_path, root_path):  # 模拟交互，3次加点
             for inf in interinf:
                 EXEMPLAR_BBX_ori_add_list, EXEMPLAR_BBX_ori_del_list, points_05, points_005, scores_05, scores_005, p_gt, \
                 img_n, Image_path, Display_width, Display_height, Image_Ori_W, Image_Ori_H \
-                    = dataplot_v3_drawbox_3_3(inf, model, device, transform, root_path)
+                    = dataplot_v3_drawbox_3_3(inf, model, device, transform, root_path, t_view, t_candidate)
                 # 创建包含所有框的统一列表
                 all_boxes = []
                 for i in range(len(EXEMPLAR_BBX_ori_add_list)):
@@ -1352,7 +1358,7 @@ def sixboxes_simulation_PE_PF(log_path, root_path):  # 模拟交互，3次加点
 
                 log_file.write(f"Processed images: {len(interinf)}\n")
                 log_file.write(f"Config: confidence_t={threshold}, ssim_mode={SSIM_MODE}, ssim_t={ssim_t}\n")
-
+                log_file.write(f"\nSummary for t_intensity={t_intensity}, t_candidate={t_candidate}:\n")
                 log_file.write(
                     f"Del Times: Count={len(del_re_time)}, Max={np.max(del_re_time)}, Mean={np.mean(del_re_time)}\n")
                 log_file.write(
@@ -1372,6 +1378,12 @@ def get_args_parser():
                         help="line number of anchor points")
     parser.add_argument('--ssim_t', default=0.8, type=int,
                         help="ssim threshold")
+    parser.add_argument('--t_intensity', default=20, type=int,
+                        help="ssim threshold")
+    parser.add_argument('--t_candidate', default=0.05, type=int,
+                        help="ssim threshold")
+    parser.add_argument('--t_view', default=0.5, type=int,
+                        help="ssim threshold")
     # dataset parameters
     parser.add_argument('--gpu_id', default=0, type=int, help='the gpu used for training')
 
@@ -1379,7 +1391,7 @@ def get_args_parser():
 
 
 def main(args):
-
+    model, device, transform, args = p2p_init_visual_counter()
     # # 与交互式计数方法对比,初始预测模型选择训练20个epoch的
     # log_path = "/home/hp/zrj/prjs/AICC/interact_box_log_test192_box33.txt"  # 43090
     # root_path = '/home/hp/zrj/Data/NEFCell/DATA_ROOT/test'  # 43090
@@ -1388,16 +1400,38 @@ def main(args):
     # #sixboxes_simulation_PF(log_path, root_path)
     # sixboxes_simulation_PE_PF(log_path, root_path)
     ssim_t_values = [0.8]
+    t_intensity_values = [5,10,15,20,25,30,35,40]
+    t_candidate_values = [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08,0.09]
     log_path = "/home/hp/zrj/prjs/AICC/interact_box_log_test192_box33.txt"
     root_path = '/home/hp/zrj/Data/NEFCell/DATA_ROOT/test'
-    for ssim_t in ssim_t_values:
+    # for ssim_t in ssim_t_values:
+    #     print(f"\n{'=' * 50}")
+    #     print(f"Running simulations with ssim_t = {ssim_t}")
+    #     print(f"{'=' * 50}\n")
+    #
+    #     # 更新参数
+    #     args.ssim_t = ssim_t
+    #     #sixboxes_simulation_PE_PF(log_path, root_path)
+    #     sixboxes_simulation_PE(log_path, root_path)
+    # for t_intensity in t_intensity_values:
+    #     print(f"\n{'=' * 50}")
+    #     print(f"Running simulations with t_intensity = {t_intensity}")
+    #     print(f"{'=' * 50}\n")
+    #
+    #     # 更新参数
+    #     args.t_intensity = t_intensity
+    #     # sixboxes_simulation_PE_PF(log_path, root_path)
+    #     sixboxes_simulation_PE(log_path, root_path, model, device, transform, args)
+    for t_candidate in t_candidate_values:
         print(f"\n{'=' * 50}")
-        print(f"Running simulations with ssim_t = {ssim_t}")
+        print(f"Running simulations with t_candidate = {t_candidate}")
         print(f"{'=' * 50}\n")
 
         # 更新参数
-        args.ssim_t = ssim_t
-        sixboxes_simulation_PE_PF(log_path, root_path)
+        args.t_candidate = t_candidate
+        # sixboxes_simulation_PE_PF(log_path, root_path)
+        sixboxes_simulation_PE(log_path, root_path, model, device, transform, args)
+
 
 
 if __name__ == '__main__':
