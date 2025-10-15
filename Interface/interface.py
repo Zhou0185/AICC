@@ -120,8 +120,10 @@ class AICCInterface(tk.Tk):
                                 help='path where to save')
             parser.add_argument('--test_output_dir', default='/home/hp/zrj/prjs/AICC/output',
                                 help='path where to save')  # 4_32
-            parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/BCData_e1500_best.pth',
+            parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/best_mae_DCC_e1500.pth',
                                 help='path where the trained weights saved')  # 3服务器
+            # parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/BCData_e1500_best.pth',
+            #                     help='path where the trained weights saved')  # 3服务器
             # parser.add_argument('--weight_path', default='/mnt/data/zrj/Mymodel/CELLSsplit_v4_best_e1500.pth',
             #                     help='path where the trained weights saved')  # 4_32服务器
 
@@ -589,12 +591,14 @@ class AICCInterface(tk.Tk):
         # The only important para
         # self.Image_path = filedialog.askopenfilename(initialdir="./", title="Select image.")
         self.Image_path = filedialog.askopenfilename(
-            initialdir="/home/hp/zrj/prjs/MYP2PNET_ROOT/crowd_datasets/BC_DATASET/DATA_ROOT/test/images",
+            initialdir="/home/hp/zrj/prjs/MYP2PNET_ROOT/crowd_datasets/DCC_DATASET/DATA_ROOT/test/images",
             title="Select image.")
         img_open = Image.open(self.Image_path)
         self.Image_name = self.Image_path.split("/")[-1].split(".")[0]
         #gt_path = self.Image_path.replace("images", "test_file").replace(".tif", ".txt")
-        gt_path = self.Image_path.replace("images", "test_file").replace(".png", ".txt")
+        # gt_path = self.Image_path.replace("images", "test_file").replace(".png", ".txt")
+        gt_path = self.Image_path.replace("images", "test_file")\
+            .replace(".jpg", ".txt").replace(".png", ".txt").replace(".tif", ".txt")
         print(gt_path)
         if os.path.exists(gt_path):
             self.Gt_path = gt_path
@@ -1081,6 +1085,7 @@ class AICCInterface(tk.Tk):
         # 为所有点画框(置信度大于0.05)
         selectedp_list = []
         sizedpointsraw = SizedPoints(self.inter_outputs_points[self.inter_outputs_scores > 0.05])  # Q_0.05
+        # sizedpointsraw = SizedPoints(self.inter_outputs_points[self.inter_outputs_scores > 0.01])  # Q_0.05
         points_005 = torch.tensor(sizedpointsraw).view(-1, 2).tolist()  # 画框内的全部锚点
         pointsraw1 = torch.tensor(sizedpointsraw).view(-1, 2).tolist()  # 画框内的全部锚点，用于计计算框最中间的点
 
@@ -1106,6 +1111,7 @@ class AICCInterface(tk.Tk):
             currentpoint_pixel = np.mean(img_array[points_005[i][1]][points_005[i][0]])  # ---注意翻一下横纵坐标
             #print("该点的像素值:", currentpoint_pixel, " 目标参考像素值average_cell_pixel：", average_cell_pixel)
             if (abs(currentpoint_pixel - average_cell_pixel) > 20):
+            #if (abs(currentpoint_pixel - average_cell_pixel) > 40):
                 print("point's pixel likes background,continue ", "currentpoint_pixel:", currentpoint_pixel,
                       "average_cell_pixel：", average_cell_pixel)
                 continue

@@ -12,11 +12,9 @@ from matplotlib import pyplot as plt
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial import KDTree
 from torch import nn
-
-##import models_apgcc
-##from models_apgcc import build_model
+from models import build_model
 from sklearn.cluster import KMeans
-from models_apgcc import build_model
+
 # pdb.set_trace()
 del_re_time = []
 add_time = []
@@ -41,217 +39,29 @@ def DrawfPoints(points, Img_path):
         plt.title(noname + " pd:" + str(llen))
         #plt.show()  # 显示图片
         return img
-# def p2p_init_visual_counter():
-#     parser = argparse.ArgumentParser('P2PNet evaluation script', parents=[get_args_parser()])
-#     args = parser.parse_args()
-#     print(args)
-#     device = torch.device('cuda:{}'.format(args.gpu_id))
-#     # get the P2PNet
-#     #model = build_model(args)
-#     model = build_model(cfg=args, training=False)
-#
-#     # move to GPU
-#     model.to(device)
-#     # load trained model
-#     if args.weight_path is not None:
-#         checkpoint = torch.load(args.weight_path, map_location='cpu')
-#         model.load_state_dict(checkpoint['model'])
-#         # convert to eval mode
-#         model.eval()
-#     # create the pre-processing transform
-#     transform = standard_transforms.Compose([
-#         standard_transforms.ToTensor(),
-#         standard_transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-#     ])
-#     return model,device,transform,args
-
-
-from models_apgcc.APGCC import Model_builder
-
-
-def get_apgcc_args_parser():
-    """
-    为加载 APGCC 模型设置参数解析器。
-    参照了 APGCC 项目 main.py 中的参数定义。
-    """
-    parser = argparse.ArgumentParser('Set parameters for APGCC model evaluation', add_help=False)
-
-    # --- 模型相关参数 ---
-    # 指定模型的骨干网络，默认为 'vgg16_bn'，与 APGCC 兼容
-    parser.add_argument('--backbone', default='vgg16_bn', type=str,
-                        help="Name of the convolutional backbone to use")
-
-    # 指定预训练权重的路径。注意：APGCC 习惯使用 --resume 作为参数名
-    parser.add_argument('--resume', default='/home/hp/zrj/prjs/pth/APGCC_NEFCell_best_e3500.pth',
-                        help='Path to the trained APGCC weights checkpoint')
-
-    # 定义 P2PNet 风格的锚点行列数，这些参数在 APGCC 的 build_model 中也会被使用
-    parser.add_argument('--row', default=2, type=int,
-                        help="Row number of anchor points")
-    parser.add_argument('--line', default=2, type=int,
-                        help="Line number of anchor points")
-
-    # --- 设备相关参数 ---
-    # 指定用于推理的 GPU ID
-    parser.add_argument('--gpu_id', default=0, type=int,
-                        help='The GPU used for evaluation')
-
-    #
-    parser.add_argument('--ssim_t_start', default=0.8, type=float,
-                        help="start value for ssim threshold range")
-    parser.add_argument('--ssim_t_end', default=0.8, type=float,
-                        help="end value for ssim threshold range")
-    parser.add_argument('--ssim_t_step', default=0.1, type=float,
-                        help="step size for ssim threshold range")
-
-    parser.add_argument('--t_view_start', default=0.1, type=float,
-                        help="Start value for t_view range")
-    parser.add_argument('--t_view_end', default=1, type=float,
-                        help="End value for t_view range")
-    parser.add_argument('--t_view_step', default=0.1, type=float,
-                        help="Step size for t_view range")
-
-    parser.add_argument('--t_candidate_start', default=0.01, type=float,
-                        help="Start value for t_candidate range")
-    parser.add_argument('--t_candidate_end', default=0.25, type=float,
-                        help="End value for t_candidate range")
-    parser.add_argument('--t_candidate_step', default=0.04, type=float,
-                        help="Step size for t_candidate range")
-    # 添加新的强度阈值参数
-    parser.add_argument('--t_intensity_start', default=5, type=float,
-                        help="Start value for t_candidate range")
-    parser.add_argument('--t_intensity_end', default=40, type=float,
-                        help="End value for t_candidate range")
-    parser.add_argument('--t_intensity_step', default=5, type=float,
-                        help="Step size for t_candidate range")
-    return parser
-
-
-import argparse
-import torch
-import torchvision.transforms as standard_transforms
-from types import SimpleNamespace # 导入 SimpleNamespace，用于轻松创建嵌套对象
-
-# 导入你重命名后的 APGCC 模型构建函数
-from models_apgcc import build_model
-
-# get_apgcc_args_parser() 函数无需修改，保持原样即可
-def get_apgcc_args_parser():
-    """
-    为加载 APGCC 模型设置参数解析器。
-    """
-    parser = argparse.ArgumentParser('Set parameters for APGCC model evaluation', add_help=False)
-    parser.add_argument('--backbone', default='vgg16_bn', type=str,
-                        help="Name of the convolutional backbone to use")
-    parser.add_argument('--resume', default='/path/to/your/apgcc_model.pth',
-                        help='Path to the trained APGCC weights checkpoint')
-    parser.add_argument('--row', default=2, type=int,
-                        help="Row number of anchor points")
-    parser.add_argument('--line', default=2, type=int,
-                        help="Line number of anchor points")
-    parser.add_argument('--gpu_id', default=0, type=int,
-                        help='The GPU used for evaluation')
-
-    #
-    parser.add_argument('--ssim_t_start', default=0.8, type=float,
-                        help="start value for ssim threshold range")
-    parser.add_argument('--ssim_t_end', default=0.8, type=float,
-                        help="end value for ssim threshold range")
-    parser.add_argument('--ssim_t_step', default=0.1, type=float,
-                        help="step size for ssim threshold range")
-
-    parser.add_argument('--t_view_start', default=0.1, type=float,
-                        help="Start value for t_view range")
-    parser.add_argument('--t_view_end', default=1, type=float,
-                        help="End value for t_view range")
-    parser.add_argument('--t_view_step', default=0.1, type=float,
-                        help="Step size for t_view range")
-
-    parser.add_argument('--t_candidate_start', default=0.01, type=float,
-                        help="Start value for t_candidate range")
-    parser.add_argument('--t_candidate_end', default=0.25, type=float,
-                        help="End value for t_candidate range")
-    parser.add_argument('--t_candidate_step', default=0.04, type=float,
-                        help="Step size for t_candidate range")
-    # 添加新的强度阈值参数
-    parser.add_argument('--t_intensity_start', default=5, type=float,
-                        help="Start value for t_candidate range")
-    parser.add_argument('--t_intensity_end', default=40, type=float,
-                        help="End value for t_candidate range")
-    parser.add_argument('--t_intensity_step', default=5, type=float,
-                        help="Step size for t_candidate range")
-    return parser
-
-
-def apgcc_init_visual_counter():
-    """
-    初始化 APGCC 模型用于计数和可视化。
-    此版本已修复 'Namespace' object has no attribute 'MODEL' 错误。
-    """
-    # 步骤 1: 解析命令行参数 (这部分不变)
-    parser = argparse.ArgumentParser('APGCC evaluation script', parents=[get_apgcc_args_parser()])
+def p2p_init_visual_counter():
+    parser = argparse.ArgumentParser('P2PNet evaluation script', parents=[get_args_parser()])
     args = parser.parse_args()
-    print("--- APGCC Model Configuration ---")
     print(args)
-
-    # 步骤 2: 设置计算设备 (这部分不变)
     device = torch.device('cuda:{}'.format(args.gpu_id))
-
-    # --- 关键修改开始 ---
-
-    # 步骤 3: 创建一个模拟的、嵌套的配置对象(cfg)来适配 APGCC 的需求
-    # APGCC 的 `build_model` 函数期望接收一个具有嵌套属性的配置对象，
-    # 而不是 argparse 创建的扁平对象。
-    cfg = SimpleNamespace()
-    cfg.MODEL = SimpleNamespace()
-    # 根据报错信息，我们需要一个 DECODER_kwargs 字典
-    cfg.MODEL.DECODER_kwargs = {}
-
-    # 步骤 4: 从扁平的 args 对象中填充嵌套的 cfg 对象
-    # 我们将 args 中的值映射到 cfg 所需的嵌套结构中。
-    # APGCC 的配置系统习惯用大写，我们遵循这个惯例。
-    cfg.MODEL.BACKBONE_NAME = args.backbone
-    cfg.MODEL.ROW = args.row
-    cfg.MODEL.LINE = args.line
-
-    # 这是导致错误的核心部分。APGCC 模型内部硬编码了对 num_classes 的需求。
-    # 对于人群/细胞计数任务，类别数通常是 2 (即前景目标 vs. 背景)。
-    cfg.MODEL.DECODER_kwargs["num_classes"] = 2
-
-    print("\n--- Created Mock Config for APGCC ---")
-    print(f"cfg.MODEL.BACKBONE_NAME = {cfg.MODEL.BACKBONE_NAME}")
-    print(f"cfg.MODEL.ROW = {cfg.MODEL.ROW}")
-    print(f"cfg.MODEL.LINE = {cfg.MODEL.LINE}")
-    print(f"cfg.MODEL.DECODER_kwargs = {cfg.MODEL.DECODER_kwargs}\n")
-
-
-    # 步骤 5: 将模拟的 cfg 对象传递给 build_model
-    # 错误修复：之前这里传递的是 args，现在传递我们新创建的 cfg
-    model = build_model(cfg=cfg, training=False)
-    print("APGCC model structure created successfully using the mock config.")
-
-    # --- 关键修改结束 ---
-
-    # 步骤 6: 将模型移动到指定设备 (这部分不变)
+    # get the P2PNet
+    model = build_model(args)
+    # move to GPU
     model.to(device)
-
-    # 步骤 7: 加载预训练权重 (这部分不变)
-    if args.resume:
-        checkpoint = torch.load(args.resume, map_location='cpu')
+    # load trained model
+    if args.weight_path is not None:
+        checkpoint = torch.load(args.weight_path, map_location='cpu')
         model.load_state_dict(checkpoint['model'])
-        print(f"Successfully loaded weights from: {args.resume}")
-
-    # 步骤 8: 将模型切换到评估模式 (这部分不变)
-    model.eval()
-
-    # 步骤 9: 创建图像预处理的 transform (这部分不变)
+        # convert to eval mode
+        model.eval()
+    # create the pre-processing transform
     transform = standard_transforms.Compose([
         standard_transforms.ToTensor(),
         standard_transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
+    return model,device,transform,args
 
-    # 步骤 10: 返回所需的所有对象，保证返回类型与原函数一致 (这部分不变)
-    return model, device, transform, args
+
 def ssim_rgb(y_true, y_pred):
     """
     分通道计算SSIM后取平均值（RGB模式）
@@ -788,7 +598,47 @@ def HungarianMatch(p_gt,p_prd,threshold=0.5):
     row_ind, col_ind = linear_sum_assignment(cost_martix_nap)
     cost_martix = np.array(cost_martix_nap)
     return int(len(cost_martix[row_ind, col_ind][np.where(cost_martix[row_ind, col_ind] < threshold)]))
+def HungarianMatch_by_distance(p_gt, p_prd, distance_threshold=10):
+    """
+    使用匈牙利算法进行点匹配，成本为点对间的欧氏距离。
+    只有当最优匹配对的距离小于 distance_threshold 时，才被计为一次成功匹配 (TP)。
 
+    参数:
+    p_gt (list): 真实点坐标列表，例如 [[x1, y1], [x2, y2], ...]
+    p_prd (list): 预测点坐标列表，格式同上
+    distance_threshold (float): 用于判断匹配是否成功的最大距离阈值
+
+    返回:
+    int: 成功匹配的数量 (TP)
+    """
+    # 1. 构建成本矩阵，矩阵的值为 p_gt 中的点与 p_prd 中的点之间的欧氏距离
+    # cost_matrix[i, j] 表示第 i 个真实点与第 j 个预测点之间的距离
+    num_gt = len(p_gt)
+    num_prd = len(p_prd)
+
+    # 处理任一列表为空的边界情况
+    if num_gt == 0 or num_prd == 0:
+        return 0
+
+    cost_matrix = np.zeros((num_gt, num_prd))
+    for i, point_gt in enumerate(p_gt):
+        for j, point_prd in enumerate(p_prd):
+            # 计算欧氏距离并填充到成本矩阵
+            dist = np.linalg.norm(np.array(point_gt) - np.array(point_prd))
+            cost_matrix[i, j] = dist
+
+    # 2. 使用匈牙利算法（linear_sum_assignment）找到总成本最小的匹配
+    # 这会确保每个真实点最多只匹配一个预测点，反之亦然（一对一匹配）
+    row_ind, col_ind = linear_sum_assignment(cost_matrix)
+
+    # 3. 从最优匹配中筛选出符合距离阈值的匹配对
+    # 获取所有最优匹配对的实际距离
+    matched_distances = cost_matrix[row_ind, col_ind]
+
+    # 计算距离小于阈值的匹配数量，这就是TP
+    tp_count = np.sum(matched_distances < distance_threshold)
+
+    return int(tp_count)
 def pointF1_score(TP,p_gt,p_prd):
     FP = int(len(p_prd)) - TP
     FN = int(len(p_gt)) - TP
@@ -1024,7 +874,9 @@ def threeboxes_simulation(model, device, transform, args, log_path, root_path, s
     # 用来存储所有解析出来的框坐标及对应的文件名
     boxes_list = []
     # 定义正则表达式来匹配文件名和框的坐标（提取元组）
-    file_pattern = re.compile(r"IMG_\d+\.tif")
+    #file_pattern = re.compile(r"IMG_\d+\.tif")
+    file_pattern = re.compile(r"\d+\.png")
+
     box_pattern_del_all = re.compile(r"#sized_box_del_all:\((\d+), (\d+), (\d+), (\d+)\)")
     box_pattern_del_re = re.compile(r"#sized_box_del_re:\((\d+), (\d+), (\d+), (\d+)\)")
     box_pattern_add = re.compile(r"#sized_box_add:\((\d+), (\d+), (\d+), (\d+)\)")
@@ -1147,9 +999,7 @@ def get_args_parser():
     # * Backbone
     parser.add_argument('--backbone', default='vgg16_bn', type=str,
                         help="name of the convolutional backbone to use")
-    # parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/NEFCell_best_e1500.pth',
-    #                     help='path where the trained weights saved')
-    parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/APGCC_NEFCell_best_e3500.pth',
+    parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/BCData_e1500_best.pth',
                         help='path where the trained weights saved')
     parser.add_argument('--row', default=2, type=int,
                         help="row number of anchor points")
@@ -1187,8 +1037,8 @@ def get_args_parser():
     return parser
 def main(args):
     #与非交互式计数方法对比,初始预测模型选择训练1500个epoch的
-    log_path = '/home/hp/zrj/prjs/AICC/interact_box_log_test192.txt'
-    root_path = '/home/hp/zrj/Data/NEFCell/DATA_ROOT/test'  # 43090
+    log_path = '/home/hp/zrj/prjs/AICC/BCD_interact_box_log.txt'
+    root_path = '/home/hp/zrj/prjs/MYP2PNET_ROOT/crowd_datasets/BC_DATASET/DATA_ROOT/test'  # 3090
     # 定义要测试的模式列表
     modes = ['PE', 'PF', 'PE_PF']
     mode = 'PE_PF'
@@ -1219,9 +1069,7 @@ def main(args):
         args.t_intensity_step
     )
     # 初始化模型（只初始化一次）
-    # model, device, transform, args = p2p_init_visual_counter()
-    model, device, transform, args = apgcc_init_visual_counter()
-
+    model, device, transform, args = p2p_init_visual_counter()
     # for ssim_t in ssim_t_values:
     #     print(f"\n{'=' * 50}")
     #     print(f"Testing with SSIM threshold: {ssim_t:.2f}")
@@ -1269,9 +1117,6 @@ def main(args):
     #     threeboxes_simulation(model, device, transform, args, log_path, root_path,
     #                           ssim_t, t_view, t_candidate, t_intensity, mode)
 if __name__ == '__main__':
-    # parser = argparse.ArgumentParser('P2PNet_simulation', parents=[get_args_parser()])
-    # args = parser.parse_args()
-    # main(args)
-    parser = argparse.ArgumentParser('APGCC_simulation', parents=[get_apgcc_args_parser()])
+    parser = argparse.ArgumentParser('P2PNet_simulation', parents=[get_args_parser()])
     args = parser.parse_args()
     main(args)

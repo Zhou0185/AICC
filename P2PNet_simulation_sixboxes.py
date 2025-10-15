@@ -18,7 +18,7 @@ from sklearn.cluster import KMeans
 # pdb.set_trace()
 del_re_time = []
 add_time = []
-SSIM_MODE = "avg"  # 可设置为 "rgb" 或 "avg"或 "gray"
+SSIM_MODE = "rgb"  # 可设置为 "rgb" 或 "avg"或 "gray"
 
 def DrawfPoints(points, Img_path):
     data = points
@@ -1401,7 +1401,9 @@ def main(args):
     # sixboxes_simulation_PE_PF(log_path, root_path)
     ssim_t_values = [0.8]
     t_intensity_values = [5,10,15,20,25,30,35,40]
-    t_candidate_values = [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08,0.09]
+    # t_candidate_values = [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08,0.09]
+    t_candidate_values = [0.05]
+
     log_path = "/home/hp/zrj/prjs/AICC/interact_box_log_test192_box33.txt"
     root_path = '/home/hp/zrj/Data/NEFCell/DATA_ROOT/test'
     # for ssim_t in ssim_t_values:
@@ -1429,8 +1431,8 @@ def main(args):
 
         # 更新参数
         args.t_candidate = t_candidate
-        # sixboxes_simulation_PE_PF(log_path, root_path)
-        sixboxes_simulation_PE(log_path, root_path, model, device, transform, args)
+        sixboxes_simulation_PE_PF(log_path, root_path)
+        # sixboxes_simulation_PE(log_path, root_path, model, device, transform, args)
 
 
 

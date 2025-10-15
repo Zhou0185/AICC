@@ -777,6 +777,48 @@ def HungarianMatch(p_gt,p_prd,threshold=0.5):
     cost_martix = np.array(cost_martix_nap)
     return int(len(cost_martix[row_ind, col_ind][np.where(cost_martix[row_ind, col_ind] < threshold)]))
 
+
+def HungarianMatch_by_distance(p_gt, p_prd, distance_threshold=10):
+    """
+    使用匈牙利算法进行点匹配，成本为点对间的欧氏距离。
+    只有当最优匹配对的距离小于 distance_threshold 时，才被计为一次成功匹配 (TP)。
+
+    参数:
+    p_gt (list): 真实点坐标列表，例如 [[x1, y1], [x2, y2], ...]
+    p_prd (list): 预测点坐标列表，格式同上
+    distance_threshold (float): 用于判断匹配是否成功的最大距离阈值
+
+    返回:
+    int: 成功匹配的数量 (TP)
+    """
+    # 1. 构建成本矩阵，矩阵的值为 p_gt 中的点与 p_prd 中的点之间的欧氏距离
+    # cost_matrix[i, j] 表示第 i 个真实点与第 j 个预测点之间的距离
+    num_gt = len(p_gt)
+    num_prd = len(p_prd)
+
+    # 处理任一列表为空的边界情况
+    if num_gt == 0 or num_prd == 0:
+        return 0
+
+    cost_matrix = np.zeros((num_gt, num_prd))
+    for i, point_gt in enumerate(p_gt):
+        for j, point_prd in enumerate(p_prd):
+            # 计算欧氏距离并填充到成本矩阵
+            dist = np.linalg.norm(np.array(point_gt) - np.array(point_prd))
+            cost_matrix[i, j] = dist
+
+    # 2. 使用匈牙利算法（linear_sum_assignment）找到总成本最小的匹配
+    # 这会确保每个真实点最多只匹配一个预测点，反之亦然（一对一匹配）
+    row_ind, col_ind = linear_sum_assignment(cost_matrix)
+
+    # 3. 从最优匹配中筛选出符合距离阈值的匹配对
+    # 获取所有最优匹配对的实际距离
+    matched_distances = cost_matrix[row_ind, col_ind]
+
+    # 计算距离小于阈值的匹配数量，这就是TP
+    tp_count = np.sum(matched_distances < distance_threshold)
+
+    return int(tp_count)
 def pointF1_score(TP,p_gt,p_prd):
     FP = int(len(p_prd)) - TP
     FN = int(len(p_gt)) - TP
