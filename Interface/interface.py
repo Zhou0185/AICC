@@ -120,10 +120,12 @@ class AICCInterface(tk.Tk):
                                 help='path where to save')
             parser.add_argument('--test_output_dir', default='/home/hp/zrj/prjs/AICC/output',
                                 help='path where to save')  # 4_32
-            parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/best_mae_DCC_e1500.pth',
-                                help='path where the trained weights saved')  # 3服务器
+            # parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/best_mae_DCC_e1500.pth',
+            #                     help='path where the trained weights saved')  # 3服务器
             # parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/BCData_e1500_best.pth',
             #                     help='path where the trained weights saved')  # 3服务器
+            parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/best_mae_PSU_e1500.pth',
+                                help='path where the trained weights saved')  # 3服务器
             # parser.add_argument('--weight_path', default='/mnt/data/zrj/Mymodel/CELLSsplit_v4_best_e1500.pth',
             #                     help='path where the trained weights saved')  # 4_32服务器
 
@@ -140,11 +142,15 @@ class AICCInterface(tk.Tk):
         self.run_log_name_add = os.path.join(args.test_output_dir, 'interact_add_log.txt')
         self.run_log_name_del = os.path.join(args.test_output_dir, 'interact_del_log.txt')
         self.run_log_name_box = os.path.join(args.test_output_dir, 'interact_box_log.txt')
+        self.run_log_name_box33 = os.path.join(args.test_output_dir, 'interact_box_log33.txt')
         print(self.run_log_name)
         with open(self.run_log_name, "a") as log_file:  # 记录计数用的模型pth等信息
             log_file.write('\nEval Log %s\n' % time.strftime("%c"))
             log_file.write("{}".format(args))
         with open(self.run_log_name_box, "a") as log_file:  # 记录计数用的模型pth等信息
+            log_file.write('\nEval Log %s\n' % time.strftime("%c"))
+            log_file.write("{}".format(args))
+        with open(self.run_log_name_box33, "a") as log_file:  # 记录计数用的模型pth等信息
             log_file.write('\nEval Log %s\n' % time.strftime("%c"))
             log_file.write("{}".format(args))
         # device = torch.device('cuda')
@@ -384,6 +390,7 @@ class AICCInterface(tk.Tk):
         with open(self.run_log_name_box, "a") as log_file:
             log_file.write('\n{}'.format(self.Image_path))
             log_file.write('{}{}'.format(" initial_count:", predict_cnt))
+
         self.initial_num = predict_cnt
         self.current_num = predict_cnt
 
@@ -439,8 +446,8 @@ class AICCInterface(tk.Tk):
         self.popup_menu.add_command(label='remove redundant points', command=self.popup_menu_1, font = 50)
         self.popup_menu.add_command(label='remove erroneous points', command=self.popup_menu_0, font = 50)
 
-        # self.popup_menu.add_command(label='box_add', command=self.popup_menu_3)
-        # self.popup_menu.add_command(label='box_del', command=self.popup_menu_4)
+        self.popup_menu.add_command(label='box_add', command=self.popup_menu_3)
+        self.popup_menu.add_command(label='box_del', command=self.popup_menu_4)
 
     def init_exemplar_area(self):
         print("init_exemplar_area")
@@ -591,7 +598,7 @@ class AICCInterface(tk.Tk):
         # The only important para
         # self.Image_path = filedialog.askopenfilename(initialdir="./", title="Select image.")
         self.Image_path = filedialog.askopenfilename(
-            initialdir="/home/hp/zrj/prjs/MYP2PNET_ROOT/crowd_datasets/DCC_DATASET/DATA_ROOT/test/images",
+            initialdir="/home/hp/zrj/prjs/MYP2PNET_ROOT/crowd_datasets/PSU_DATASET/DATA_ROOT/test/images",
             title="Select image.")
         img_open = Image.open(self.Image_path)
         self.Image_name = self.Image_path.split("/")[-1].split(".")[0]
@@ -806,7 +813,7 @@ class AICCInterface(tk.Tk):
         # self.estimate_lb = -1
         # self.estimate_ub = 0
         # self.interactive_adaptation()
-        with open(self.run_log_name_box, "a") as log_file:
+        with open(self.run_log_name_box33, "a") as log_file:
             log_file.write('\n{}#sized_box_add:{}'.format(self.Image_path, self.EXEMPLAR_LIST))
         self.EXEMPLAR_LIST = []
 
@@ -815,7 +822,7 @@ class AICCInterface(tk.Tk):
         # self.estimate_lb = -1
         # self.estimate_ub = 0
         # self.interactive_adaptation()
-        with open(self.run_log_name_box, "a") as log_file:
+        with open(self.run_log_name_box33, "a") as log_file:
             log_file.write('#sized_box_del:{}'.format(self.EXEMPLAR_LIST))
         self.EXEMPLAR_LIST = []
 
@@ -1023,9 +1030,12 @@ class AICCInterface(tk.Tk):
         def DrawPointi(pointsraw, sindex):
             self.Visual_image_finding = self.output_image.copy()  # 画图标记
             draw = ImageDraw.Draw(self.Visual_image_finding)
+            # draw.ellipse((pointsraw[sindex][0] - 2, pointsraw[sindex][1] - 2, pointsraw[sindex][0] + 2,
+            #               pointsraw[sindex][1] + 2), width=1,
+            #              outline='red', fill=(255, 0, 0))
             draw.ellipse((pointsraw[sindex][0] - 2, pointsraw[sindex][1] - 2, pointsraw[sindex][0] + 2,
                           pointsraw[sindex][1] + 2), width=1,
-                         outline='red', fill=(255, 0, 0))
+                         outline='green', fill=(0, 255, 0))
             # draw.ellipse((pointsraw[sindex][0] - 4, pointsraw[sindex][1] - 4, pointsraw[sindex][0] + 4,
             #               pointsraw[sindex][1] + 4), width=1, outline='red', fill=None)
             self.Visual_Label.image = self.Visual_image_finding.copy()

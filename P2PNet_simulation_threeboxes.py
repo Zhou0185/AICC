@@ -1,4 +1,5 @@
 import argparse
+import math
 import os
 import pdb
 import re
@@ -19,7 +20,7 @@ from sklearn.cluster import KMeans
 del_re_time = []
 add_time = []
 # 添加新的配置参数来控制SSIM模式
-SSIM_MODE = "gray"  # 可设置为 "rgb" 或 "avg"或 "gray"
+SSIM_MODE = "rgb"  # 可设置为 "rgb" 或 "avg"或 "gray"
 def DrawfPoints(points, Img_path):
         data = points
         llen = len(data)
@@ -184,7 +185,7 @@ def calculate_ssim(y_true, y_pred):
 def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,scores_005, current_points,current_scores,
                                     Display_width, Display_height, Image_Ori_W, Image_Ori_H, ssim_t=0.5, t_intensity=20):
     """Add points interactively within specified bounding boxes."""
-    start = time.time()
+    start = time.time();I=0
     def resize_points(points):
         """Resize points to match display dimensions."""
         return [
@@ -196,120 +197,66 @@ def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,
         """Draw a single point on the image."""
         draw = ImageDraw.Draw(img)
         draw.ellipse((points[index][0] - 2, points[index][1] - 2, points[index][0] + 2, points[index][1] + 2),
-                     width=12, outline='red', fill=(255, 0, 0))
+                     width=12, outline='red', fill=(255, I, I))
         return img
 
     # Calculate bounding box dimensions
     x_min, x_max = min(EXEMPLAR_BBX[0], EXEMPLAR_BBX[2]), max(EXEMPLAR_BBX[0], EXEMPLAR_BBX[2])
     y_min, y_max = min(EXEMPLAR_BBX[1], EXEMPLAR_BBX[3]), max(EXEMPLAR_BBX[1], EXEMPLAR_BBX[3])
     x_len, y_len = x_max - x_min, y_max - y_min
-    # img_open = Image.open(self.Image_path)
-    # self.Image_name = self.Image_path.split("/")[-1].split(".")[0]
-    # gt_path = self.Image_path.replace("images", "test_file").replace(".tif", ".txt")
-    # print(gt_path)
-    # if os.path.exists(gt_path):
-    #     self.Gt_path = gt_path
-    # self.max_hw = 1504
-    # W, H = img_open.size
-    # img_open = img_open.resize((self.Display_width, self.Display_height))
-    # img_show = ImageTk.PhotoImage(img_open)
-    # self.Input_Image_Label.configure(image=img_show)
-    # self.Input_Image_Label.image = img_show
-    # self.Input_Image = img_open.copy()
-
     # Crop and process image within bounding box
     crop_area_base = (x_min, y_min, x_max, y_max)
-    # input_image = Image.open(Image_path).convert('RGB').resize((Display_width, Display_height), Image.LANCZOS)
-    # input_image = Image.open(Image_path).resize((Display_width, Display_height))
-
-    # Calculate bounding box dimensions
     x_min, x_max = min(EXEMPLAR_BBX[0], EXEMPLAR_BBX[2]), max(EXEMPLAR_BBX[0], EXEMPLAR_BBX[2])
     y_min, y_max = min(EXEMPLAR_BBX[1], EXEMPLAR_BBX[3]), max(EXEMPLAR_BBX[1], EXEMPLAR_BBX[3])
     x_len, y_len = x_max - x_min, y_max - y_min
-
-
-
     input_image = Image.open(Image_path).resize((Display_width, Display_height))
-    # plt.imshow(input_image)
-    # plt.imsave("input_image.png", input_image)
-    #plt.show()  # 显示图片
-    # 检查裁剪区域是否有效
-    # print(crop_area_base)
-    # x_min, y_min, x_max, y_max = crop_area_base
-    # if (x_min >= 0 and y_min >= 0 and
-    #         x_max <= input_image.width and y_max <= input_image.height):
-    #     print("裁剪区域有效")
-    # else:
-    #     print("裁剪区域超出图像范围")
-
-    # 裁剪图像
     crop_img_base_rgb = input_image.crop(crop_area_base)
-
-    # 检查裁剪图像的像素值范围
-    # crop_img_array = np.array(crop_img_base_rgb)
-    # print("裁剪图像像素值范围:", crop_img_array.min(), crop_img_array.max())
-    #
-    # # 显示裁剪图像
-    # plt.imshow(crop_img_base_rgb, vmin=0, vmax=255)  # 假设像素值范围是 [0, 255]
-    # plt.imsave("crop_img_base_rgb.png", crop_img_base_rgb)
-    # plt.show()
     #rgb
-    # 将图像转换为 numpy 数组并展平
     crop_img_base_rgb_array = np.array(crop_img_base_rgb)
-    # 将图像展平成 (num_pixels, 3) 的二维数组，每行代表一个像素的 RGB 值
     pixels_rgb = crop_img_base_rgb_array.reshape(-1, 3)
-
-    # 检查数据中的独特点
-    #unique_points = np.unique(pixels_rgb, axis=0)
-    #print("Unique points:", unique_points)
-    # 根据独特点数量设置 n_clusters
-    #nn_clusters = len(unique_points)
-    #print("nn_clusters",nn_clusters)
-    # 使用 K-means 进行聚类，将图像分为两类（细胞和背景）
     #kmeans_rgb = KMeans(n_clusters=n_clusters, random_state=0, n_init=10).fit(pixels_rgb)
     kmeans_rgb = KMeans(n_clusters=2, random_state=0).fit(pixels_rgb)
     # kmeans_rgb = KMeans(n_clusters=2, random_state=0, n_init='auto').fit(pixels_rgb)
-    # 获取聚类标签（0 或 1），每个标签对应一个类
     labels_rgb = kmeans_rgb.labels_
-    # 将标签重新形状为原图大小
     labels_rgb_image = labels_rgb.reshape(crop_img_base_rgb_array.shape[:2])
-    # 定义中心区域的大小
-    center_area_size = 5  # 5x5 的中心区域
+    center_area_size = 5  # 5x5
     half_size = center_area_size // 2
-    # 获取图像中心坐标
     center_x, center_y = crop_img_base_rgb_array.shape[0] // 2, crop_img_base_rgb_array.shape[1] // 2
-    # 获取中心区域内的标签，并统计出现频率
     center_area_labels = labels_rgb_image[
                          center_x - half_size:center_x + half_size + 1,
                          center_y - half_size:center_y + half_size + 1
                          ]
-    # 找到中心区域内最频繁出现的标签作为细胞区域标签
     cell_label = np.bincount(center_area_labels.ravel()).argmax()
-    # 创建细胞区域的掩码
     mask = (labels_rgb_image == cell_label).astype(np.uint8)
-    # 提取细胞部分和背景部分的像素
     cell_pixels = crop_img_base_rgb_array[mask == 1]
     #background_pixels = crop_img_base_rgb_array[mask == 0]
-    # 计算细胞部分和背景部分的平均像素值
     average_cell_pixel = np.mean(cell_pixels.mean(axis=0))
     #average_background_pixel = background_pixels.mean(axis=0)
-    # 计算背景和细胞的平均像素差值
     #average_pixel_diff = np.mean(np.abs(average_cell_pixel - average_background_pixel))
-
     # Resize points
     resized_points = resize_points(points_005)
     points_raw = torch.tensor(resized_points).view(-1, 2).tolist()
     points_raw_copy = points_raw.copy()
-    # current_points = resized_points(current_points)#会重复reszie
     current_points_copy = current_points[:]
     current_scores_copy = current_scores[:]
-
     # img_raw = Image.open(Image_path).convert('L').resize((Display_width, Display_height), Image.LANCZOS)
     img_raw = Image.open(Image_path).convert('RGB').resize((Display_width, Display_height))
     img_array = np.array(img_raw)
     selected_points = []
-
-    # Traverse all points (confidence > 0.05)
+    # def ssim_avg(y_true, y_pred):
+    #     y_pred = np.array(y_pred)
+    #     y_true = np.array(y_true)
+    #     if y_true.ndim == 2 and y_pred.ndim == 2:
+    #         return calculate_ssim(y_true, y_pred)
+    #     if y_true.shape[2] != y_pred.shape[2]:
+    #         raise ValueError("输入图像的通道数不匹配")
+    #     ssim_channels = []
+    #     for i in range(y_true.shape[2]):
+    #         channel_true = y_true[:, :, I]
+    #         channel_pred = y_pred[:, :, I]
+    #         ssim = calculate_ssim(channel_true, channel_pred)
+    #         ssim_channels.append(ssim)
+    #     return np.mean(ssim_channels)
     # start = time.time()
     for i, point in enumerate(points_raw):
         if point in selected_points:
@@ -320,9 +267,6 @@ def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,
         point[1] = min(point[1], Display_height - 1)
         current_pixel = np.mean(img_array[points_raw[i][1]][points_raw[i][0]])  # ---注意翻一下横纵坐标
         #current_pixel = img_array[point[1]][point[0]]
-        # if current_pixel < max_pixel // 2:
-        #     continue
-        #if (abs(current_pixel - average_cell_pixel) > 8):
         if (abs(current_pixel - average_cell_pixel) > t_intensity):
             # print("点像素与细胞像素差距过大。point's pixel likes background,continue ", "该点的像素值:", current_pixel,
             #       " 目标参考像素值average_cell_pixel：", average_cell_pixel)
@@ -350,7 +294,16 @@ def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,
             if crop_img.size != crop_img_base_rgb.size:
                 crop_img = crop_img.resize(crop_img_base_rgb.size, Image.LANCZOS)
 
-            s_score = ssim(crop_img, crop_img_base_rgb)
+            if SSIM_MODE == "rgb":
+                s_score = ssim_rgb(crop_img, crop_img_base_rgb)
+            elif SSIM_MODE == "avg":
+                s_score = ssim_avg(crop_img, crop_img_base_rgb)
+            elif SSIM_MODE == "gray":
+                s_score = ssim_gray(crop_img, crop_img_base_rgb)
+            else:
+                raise ValueError(f"无效的SSIM模式: {SSIM_MODE}. 请使用 'rgb' 或 'avg'或 'gray'")
+
+            #s_score = ssim(crop_img, crop_img_base_rgb)
             if s_score < ssim_t:
                 #print("图像ssim相似度:", s_score, " 跳过")
                 continue
@@ -402,6 +355,7 @@ def interactive_adaptation_boxs_del(img_n, EXEMPLAR_BBX, Image_path, points_005,
                 slist.append(current_scores_copy[i])
         return pnum, plist, slist
 
+
     # Calculate bounding box dimensions
     x_min, x_max = min(EXEMPLAR_BBX[0], EXEMPLAR_BBX[2]), max(EXEMPLAR_BBX[0], EXEMPLAR_BBX[2])
     y_min, y_max = min(EXEMPLAR_BBX[1], EXEMPLAR_BBX[3]), max(EXEMPLAR_BBX[1], EXEMPLAR_BBX[3])
@@ -449,7 +403,16 @@ def interactive_adaptation_boxs_del(img_n, EXEMPLAR_BBX, Image_path, points_005,
             if crop_img.size != crop_img_base.size:
                 crop_img = crop_img.resize(crop_img_base.size, Image.LANCZOS)
 
-            s_score = ssim(crop_img, crop_img_base)
+            if SSIM_MODE == "rgb":
+                s_score = ssim_rgb(crop_img, crop_img_base)
+            elif SSIM_MODE == "avg":
+                s_score = ssim_avg(crop_img, crop_img_base)
+            elif SSIM_MODE == "gray":
+                s_score = ssim_gray(crop_img, crop_img_base)
+            else:
+                raise ValueError(f"无效的SSIM模式: {SSIM_MODE}. 请使用 'rgb' 或 'avg'或 'gray'")
+
+            #s_score = ssim(crop_img, crop_img_base)
             if s_score < ssim_t:
                 #print("图像ssim相似度:", s_score, " 跳过")
                 continue
@@ -921,8 +884,9 @@ def threeboxes_simulation(model, device, transform, args, log_path, root_path, s
             f"ORIGINAL: F1={m_F1point_score_ori}, "
             f"Precision={m_Precision_score_ori}, "
             f"Recall={m_Recall_score_ori}, "
-            f"MAE={mae_ori}, "
-            f"MSE={mse_ori}\n"
+            f"MAE={mae_ori},"
+            f"MSE={mse_ori},"
+            f"RMSE={math.sqrt(mse_ori)}\n"
         )
 
         # 单行记录当前模型性能指标
@@ -931,7 +895,8 @@ def threeboxes_simulation(model, device, transform, args, log_path, root_path, s
             f"Precision={m_Precision_score_cur}, "
             f"Recall={m_Recall_score_cur}, "
             f"MAE={mae_cur}, "
-            f"MSE={mse_cur}\n"
+            f"MSE={mse_cur},"
+            f"RMSE={math.sqrt(mse_cur)}\n"
         )
     # with open(run_log_path, "a") as log_file:
     #     log_file.write(f'\nEval Log {time.strftime("%c")}\n')
@@ -998,7 +963,7 @@ def main(args):
     log_path = '/home/hp/zrj/prjs/AICC/interact_box_log_test192.txt'
     root_path = '/home/hp/zrj/Data/NEFCell/DATA_ROOT/test'  # 43090
     # 定义要测试的模式列表
-    modes = ['PE', 'PF', 'PE_PF']
+    modes = ['PE', 'PF']
     mode = 'PE_PF'
 
     # 创建SSIM阈值范围
@@ -1012,14 +977,14 @@ def main(args):
         args.t_view_end + args.t_view_step,
         args.t_view_step
     )
-
+    t_candidate_values = [0.01, 0.05, 0.1, 0.15, 0.20, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
     t_candidate_values = np.arange(
         args.t_candidate_start,
         args.t_candidate_end + args.t_candidate_step,
         args.t_candidate_step
     )
     # t_candidate_values = [0.01, 0.05, 0.1, 0.15, 0.20, 0.25, 0.3,0.35,0.4,0.45,0.5]
-    t_candidate_values = [0.05]
+    t_view_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7,0.8,0.9,1]
 
     t_intensity_values = np.arange(
         args.t_intensity_start,
@@ -1034,25 +999,27 @@ def main(args):
     #     print(f"{'=' * 50}")
     #     # 修改SSIM阈值并运行测试
     #     threeboxes_simulation(model, device, transform, args, log_path, root_path, ssim_t)
+
     # ssim_t=0.8
     # t_intensity=20
     # t_candidate = 0.05
     # for t_view in t_view_values:
     #     print(f"\n{'=' * 50}")
-    #     print(f"Testing with SSIM threshold: {t_view:.2f}")
+    #     print(f"Testing with view_values threshold: {t_view:.2f}")
     #     print(f"{'=' * 50}")
     #     # 修改SSIM阈值并运行测试
-    #     threeboxes_simulation(model, device, transform, args, log_path, root_path, ssim_t, t_view, t_candidate, t_intensity)
-    ssim_t=0.8
-    t_view=0.5
-    t_intensity=20
-    for t_candidate in t_candidate_values:
-        print(f"\n{'=' * 50}")
-        print(f"Testing with t_candidate threshold: {t_candidate}")
-        print(f"{'=' * 50}")
-        # 修改SSIM阈值并运行测试
-        threeboxes_simulation(model, device, transform, args, log_path, root_path,
-                          ssim_t, t_view, t_candidate, t_intensity, mode)
+    #     threeboxes_simulation(model, device, transform, args, log_path, root_path,
+    #                               ssim_t, t_view, t_candidate, t_intensity, mode)
+    #ssim_t=0.8
+    # t_view=0.5
+    # t_intensity=20
+    # for t_candidate in t_candidate_values:
+    #     print(f"\n{'=' * 50}")
+    #     print(f"Testing with t_candidate threshold: {t_candidate}")
+    #     print(f"{'=' * 50}")
+    #     # 修改SSIM阈值并运行测试
+    #     threeboxes_simulation(model, device, transform, args, log_path, root_path,
+    #                       ssim_t, t_view, t_candidate, t_intensity, mode)
     # ssim_t=0.8
     # t_view=0.5
     # t_candidate = 0.05
@@ -1063,17 +1030,17 @@ def main(args):
     #     # 修改SSIM阈值并运行测试
     #     threeboxes_simulation(model, device, transform, args, log_path, root_path,
     #                           ssim_t, t_view, t_candidate, t_intensity, mode)
-    # ssim_t=0.8
-    # t_view=0.5
-    # t_candidate = 0.05
-    # t_intensity = 20
-    # for mode in modes:
-    #     print(f"\n{'=' * 50}")
-    #     print(f"Testing with mode: {mode}")
-    #     print(f"{'=' * 50}")
-    #     # 修改SSIM阈值并运行测试
-    #     threeboxes_simulation(model, device, transform, args, log_path, root_path,
-    #                           ssim_t, t_view, t_candidate, t_intensity, mode)
+    ssim_t=0.8
+    t_view=0.5
+    t_candidate = 0.05
+    t_intensity = 20
+    for mode in modes:
+        print(f"\n{'=' * 50}")
+        print(f"Testing with mode: {mode}")
+        print(f"{'=' * 50}")
+        # 修改SSIM阈值并运行测试
+        threeboxes_simulation(model, device, transform, args, log_path, root_path,
+                              ssim_t, t_view, t_candidate, t_intensity, mode)
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('P2PNet_simulation', parents=[get_args_parser()])
     args = parser.parse_args()

@@ -1,4 +1,5 @@
 import argparse
+import math
 import os
 import pdb
 import random
@@ -83,7 +84,7 @@ def get_apgcc_args_parser():
                         help="Name of the convolutional backbone to use")
 
     # 指定预训练权重的路径。注意：APGCC 习惯使用 --resume 作为参数名
-    parser.add_argument('--resume', default='/home/hp/zrj/prjs/pth/APGCC_NEFCell_best_e3500.pth',
+    parser.add_argument('--resume', default='/home/hp/zrj/prjs/pth/APGCC_BCD_best.pth',
                         help='Path to the trained APGCC weights checkpoint')
 
     # 定义 P2PNet 风格的锚点行列数，这些参数在 APGCC 的 build_model 中也会被使用
@@ -131,19 +132,23 @@ def get_apgcc_args_parser():
 import argparse
 import torch
 import torchvision.transforms as standard_transforms
-from types import SimpleNamespace
+from types import SimpleNamespace # 导入 SimpleNamespace，用于轻松创建嵌套对象
 
 # 导入你重命名后的 APGCC 模型构建函数
 # from models_apgcc import build_model
 
 def get_apgcc_args_parser():
+    """
+    为加载 APGCC 模型设置参数解析器。
+    这个函数只定义参数，并返回 parser 对象。
+    """
     from config import cfg
     parser = argparse.ArgumentParser('APGCC_simulation')
 
     # --- APGCC 特有的配置参数 ---
     # APGCC 主要通过一个 .yml 配置文件来管理参数
     parser.add_argument('-c', '--config_file', type=str,
-                        default="/home/hp/zrj/prjs/APGCC-main/apgcc/configs/AICC_test.yml",
+                        default="/home/hp/zrj/prjs/APGCC-main/apgcc/configs/AICC_BCDdata_test.yml",
                         help='The path to the APGCC config file')
 
     # 允许从命令行覆盖配置文件中的参数
@@ -219,7 +224,7 @@ def apgcc_init_visual_counter():
     model.to(device)
 
     # 6. 加载预训练权重 (APGCC 的方式)
-    pretrained_dict = torch.load(os.path.join("/home/hp/zrj/prjs/pth", 'APGCC_NEFCell_best_e3500.pth'), map_location='cpu')
+    pretrained_dict = torch.load(os.path.join("/home/hp/zrj/prjs/pth", 'APGCC_BCD_best.pth'), map_location='cpu')
     # pretrained_dict = torch.load(os.path.join(source_dir, 'SHHA_best.pth'), map_location='cpu')
     model_dict = model.state_dict()
     param_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict.keys()}
@@ -329,6 +334,7 @@ def ssim_gray(y_true, y_pred):
     return calculate_ssim(y_true, y_pred)
 # 统一入口函数（根据配置选择不同模式）
 def ssim(y_true, y_pred):
+    """主SSIM计算函数，根据全局配置选择算法"""
     if SSIM_MODE == "rgb":
         return ssim_rgb(y_true, y_pred)
     elif SSIM_MODE == "avg":
@@ -356,41 +362,25 @@ def calculate_ssim(y_true, y_pred):
 
 def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,scores_005, current_points,current_scores,
                                     Display_width, Display_height, Image_Ori_W, Image_Ori_H, ssim_t=0.5, t_intensity=20):
-    start = time.time();I=0
+
+    start = time.time()
     def resize_points(points):
-        """Resize points to match display dimensions."""
+
         return [
             (round(int(point[0]) * Display_width // Image_Ori_W), round(int(point[1]) * Display_height // Image_Ori_H))
             for point in points
         ]
 
     def draw_point(points, index, img):
-        """Draw a single point on the image."""
+
         draw = ImageDraw.Draw(img)
         draw.ellipse((points[index][0] - 2, points[index][1] - 2, points[index][0] + 2, points[index][1] + 2),
-                     width=12, outline='red', fill=(255, I, I))
+                     width=12, outline='red', fill=(255, 0, 0))
         return img
 
-
-    # Calculate bounding box dimensions
     x_min, x_max = min(EXEMPLAR_BBX[0], EXEMPLAR_BBX[2]), max(EXEMPLAR_BBX[0], EXEMPLAR_BBX[2])
     y_min, y_max = min(EXEMPLAR_BBX[1], EXEMPLAR_BBX[3]), max(EXEMPLAR_BBX[1], EXEMPLAR_BBX[3])
-    x_len, y_len = x_max - x_min, y_max - y_min;I=0
-    # img_open = Image.open(self.Image_path)
-    # self.Image_name = self.Image_path.split("/")[-1].split(".")[0]
-    # gt_path = self.Image_path.replace("images", "test_file").replace(".tif", ".txt")
-    # print(gt_path)
-    # if os.path.exists(gt_path):
-    #     self.Gt_path = gt_path
-    # self.max_hw = 1504
-    # W, H = img_open.size
-    # img_open = img_open.resize((self.Display_width, self.Display_height))
-    # img_show = ImageTk.PhotoImage(img_open)
-    # self.Input_Image_Label.configure(image=img_show)
-    # self.Input_Image_Label.image = img_show
-    # self.Input_Image = img_open.copy()
-
-    # Crop and process image within bounding box
+    x_len, y_len = x_max - x_min, y_max - y_min
     crop_area_base = (x_min, y_min, x_max, y_max)
     # input_image = Image.open(Image_path).convert('RGB').resize((Display_width, Display_height), Image.LANCZOS)
     # input_image = Image.open(Image_path).resize((Display_width, Display_height))
@@ -399,8 +389,6 @@ def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,
     x_min, x_max = min(EXEMPLAR_BBX[0], EXEMPLAR_BBX[2]), max(EXEMPLAR_BBX[0], EXEMPLAR_BBX[2])
     y_min, y_max = min(EXEMPLAR_BBX[1], EXEMPLAR_BBX[3]), max(EXEMPLAR_BBX[1], EXEMPLAR_BBX[3])
     x_len, y_len = x_max - x_min, y_max - y_min
-
-
 
     input_image = Image.open(Image_path).resize((Display_width, Display_height))
     # plt.imshow(input_image)
@@ -414,11 +402,8 @@ def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,
     #     print("裁剪区域有效")
     # else:
     #     print("裁剪区域超出图像范围")
-
-    # 裁剪图像
     crop_img_base_rgb = input_image.crop(crop_area_base)
 
-    # 检查裁剪图像的像素值范围
     # crop_img_array = np.array(crop_img_base_rgb)
     # print("裁剪图像像素值范围:", crop_img_array.min(), crop_img_array.max())
     #
@@ -427,118 +412,48 @@ def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,
     # plt.imsave("crop_img_base_rgb.png", crop_img_base_rgb)
     # plt.show()
     #rgb
-    # 将图像转换为 numpy 数组并展平
-    crop_img_base_rgb_array = np.array(crop_img_base_rgb)
-    # 将图像展平成 (num_pixels, 3) 的二维数组，每行代表一个像素的 RGB 值
-    pixels_rgb = crop_img_base_rgb_array.reshape(-1, 3)
 
-    # 检查数据中的独特点
+    crop_img_base_rgb_array = np.array(crop_img_base_rgb)
+    pixels_rgb = crop_img_base_rgb_array.reshape(-1, 3)
     #unique_points = np.unique(pixels_rgb, axis=0)
     #print("Unique points:", unique_points)
-    # 根据独特点数量设置 n_clusters
     #nn_clusters = len(unique_points)
     #print("nn_clusters",nn_clusters)
-    # 使用 K-means 进行聚类，将图像分为两类（细胞和背景）
     #kmeans_rgb = KMeans(n_clusters=n_clusters, random_state=0, n_init=10).fit(pixels_rgb)
     kmeans_rgb = KMeans(n_clusters=2, random_state=0).fit(pixels_rgb)
     # kmeans_rgb = KMeans(n_clusters=2, random_state=0, n_init='auto').fit(pixels_rgb)
-    # 获取聚类标签（0 或 1），每个标签对应一个类
     labels_rgb = kmeans_rgb.labels_
-    # 将标签重新形状为原图大小
     labels_rgb_image = labels_rgb.reshape(crop_img_base_rgb_array.shape[:2])
-    # 定义中心区域的大小
-    center_area_size = 5  # 5x5 的中心区域
+    center_area_size = 5  # 5x5
     half_size = center_area_size // 2
-    # 获取图像中心坐标
     center_x, center_y = crop_img_base_rgb_array.shape[0] // 2, crop_img_base_rgb_array.shape[1] // 2
-    # 获取中心区域内的标签，并统计出现频率
     center_area_labels = labels_rgb_image[
                          center_x - half_size:center_x + half_size + 1,
                          center_y - half_size:center_y + half_size + 1
                          ]
-    # 找到中心区域内最频繁出现的标签作为细胞区域标签
     cell_label = np.bincount(center_area_labels.ravel()).argmax()
-    # 创建细胞区域的掩码
     mask = (labels_rgb_image == cell_label).astype(np.uint8)
-    # 提取细胞部分和背景部分的像素
     cell_pixels = crop_img_base_rgb_array[mask == 1]
     #background_pixels = crop_img_base_rgb_array[mask == 0]
-    # 计算细胞部分和背景部分的平均像素值
     average_cell_pixel = np.mean(cell_pixels.mean(axis=0))
     #average_background_pixel = background_pixels.mean(axis=0)
-    # 计算背景和细胞的平均像素差值
     #average_pixel_diff = np.mean(np.abs(average_cell_pixel - average_background_pixel))
 
     # Resize points
     resized_points = resize_points(points_005)
     points_raw = torch.tensor(resized_points).view(-1, 2).tolist()
     points_raw_copy = points_raw.copy()
-    # current_points = resized_points(current_points)#会重复reszie
     current_points_copy = current_points[:]
     current_scores_copy = current_scores[:]
-
     # img_raw = Image.open(Image_path).convert('L').resize((Display_width, Display_height), Image.LANCZOS)
     img_raw = Image.open(Image_path).convert('RGB').resize((Display_width, Display_height))
     img_array = np.array(img_raw)
     selected_points = []
-    # def ssim_avg(y_true, y_pred):
-    #     y_pred = np.array(y_pred)
-    #     y_true = np.array(y_true)
-    #
-    #     # 如果是灰度图像（2维），则直接计算 SSIM
-    #     if y_true.ndim == 2 and y_pred.ndim == 2:
-    #         return calculate_ssim(y_true, y_pred)
-    #
-    #     # 如果是彩色图像（3维），则分通道计算 SSIM
-    #     if y_true.shape[2] != y_pred.shape[2]:
-    #         raise ValueError("输入图像的通道数不匹配")
-    #
-    #     ssim_channels = []
-    #     for i in range(y_true.shape[2]):
-    #         channel_true = y_true[:, :, I]
-    #         channel_pred = y_pred[:, :, I]
-    #         ssim = calculate_ssim(channel_true, channel_pred)
-    #         ssim_channels.append(ssim)
-    #
-    #     return np.mean(ssim_channels)
-    #
-    #     # 确保输入是numpy数组
-    #     y_true = np.array(y_true)
-    #     y_pred = np.array(y_pred)
-    #
-    #     # 检测数据范围
-    #     max_pixel = max(y_true.max(), y_pred.max())
-    #     min_pixel = min(y_true.min(), y_pred.min())
-    #     data_range = max_pixel - min_pixel
-    #
-    #     # 如果数据范围很小或为0，使用默认范围255
-    #     if data_range < 1.0:
-    #         data_range = 255.0
-    #
-    #     # 转换为灰度图像
-    #     if y_true.ndim == 3 and y_true.shape[2] == 3:  # RGB图像
-    #         y_true = (y_true[:, :, 0] +y_true[:, :, 1] + y_true[:, :, 2])
-    #     elif y_true.ndim == 3:  # 多通道非RGB
-    #         y_true = np.mean(y_true, axis=2)
-    #
-    #     if y_pred.ndim == 3 and y_pred.shape[2] == 3:  # RGB图像
-    #         y_pred = (y_pred[:, :, 0] +y_pred[:, :, 1] + y_pred[:, :, 2])
-    #     elif y_pred.ndim == 3:  # 多通道非RGB
-    #         y_pred = np.mean(y_pred, axis=2)
-    #
-    #     # 确保是2D灰度图像
-    #     if y_true.ndim != 2 or y_pred.ndim != 2:
-    #         raise ValueError("灰度转换失败，结果是三维数组")
-    #
-    #     # 计算灰度图像的SSIM
-    #     return calculate_ssim(y_true, y_pred)
-    # Traverse all points (confidence > 0.05)
     # start = time.time()
     for i, point in enumerate(points_raw):
         if point in selected_points:
             continue
 
-        # Ensure points stay within bounds
         point[0] = min(point[0], Display_width - 1)
         point[1] = min(point[1], Display_height - 1)
         current_pixel = np.mean(img_array[points_raw[i][1]][points_raw[i][0]])  # ---注意翻一下横纵坐标
@@ -569,18 +484,9 @@ def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,
             crop_area = (n_x_min, n_y_min, n_x_max, n_y_max)
             #crop_img = input_image.crop(crop_area).convert('L')
             crop_img = input_image.copy().crop(crop_area).convert('RGB')
-
             if crop_img.size != crop_img_base_rgb.size:
                 crop_img = crop_img.resize(crop_img_base_rgb.size, Image.LANCZOS)
-            if SSIM_MODE == "rgb":
-                s_score = ssim_rgb(crop_img, crop_img_base_rgb)
-            elif SSIM_MODE == "avg":
-                s_score = ssim_avg(crop_img, crop_img_base_rgb)
-            elif SSIM_MODE == "gray":
-                s_score = ssim_gray(crop_img, crop_img_base_rgb)
-            else:
-                raise ValueError(f"无效的SSIM模式: {SSIM_MODE}. 请使用 'rgb' 或 'avg'或 'gray'")
-            #s_score = ssim(crop_img, crop_img_base_rgb)
+            s_score = ssim(crop_img, crop_img_base_rgb)
             if s_score < ssim_t:
                 #print("图像ssim相似度:", s_score, " 跳过")
                 continue
@@ -596,7 +502,7 @@ def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,
     end = time.time()
     #print("adapative time:", end - start)
     add_time.append(end-start)
-    # Draw bounding box on the image
+
     draw = ImageDraw.Draw(img_n)
     draw.rectangle(EXEMPLAR_BBX, outline='red', width=2)
     return img_n, len(current_points_copy), current_points_copy,current_scores_copy
@@ -604,20 +510,24 @@ def interactive_adaptation_boxs_add(img_n, EXEMPLAR_BBX, Image_path, points_005,
 
 def interactive_adaptation_boxs_del(img_n, EXEMPLAR_BBX, Image_path, points_005,scores_005, current_points,current_scores,
                                     Display_width, Display_height, Image_Ori_W, Image_Ori_H, ssim_t=0.5):
+    """Delete points interactively within specified bounding boxes."""
     start = time.time()
     def resize_points(points):
+        """Resize points to match display dimensions."""
         return [
             (round(int(point[0]) * Display_width // Image_Ori_W), round(int(point[1]) * Display_height // Image_Ori_H))
             for point in points
         ]
 
     def draw_point(points, index, img):
+        """Draw a single point on the image."""
         draw = ImageDraw.Draw(img)
         draw.ellipse((points[index][0] - 2, points[index][1] - 2, points[index][0] + 2, points[index][1] + 2),
                      width=2, outline='red', fill=(255, 0, 0))
         return img
 
     def get_area_points(x_len, y_len, points_raw,current_scores_copy, point, selected_list):
+        """Get points within a specific area defined by bounding box dimensions."""
         pnum, plist,slist = 0, [], []
         for i,p in enumerate(points_raw):
             if (point[0] - x_len // 2 < int(p[0]) < point[0] + x_len // 2 and
@@ -647,11 +557,9 @@ def interactive_adaptation_boxs_del(img_n, EXEMPLAR_BBX, Image_path, points_005,
     # plt.show()  # 显示图片
     img_array_n = np.array(crop_img_base).reshape(1, -1)
     max_pixel = max(img_array_n[0])
-
     current_points_copy = current_points[:]
     current_scores_copy = current_scores[:]
     selected_list = []
-
     # start = time.time()
     #for i, point in enumerate(points_raw):
     for i,point in enumerate(current_points_copy[:]):
@@ -664,26 +572,29 @@ def interactive_adaptation_boxs_del(img_n, EXEMPLAR_BBX, Image_path, points_005,
             crop_area = (n_x_min, n_y_min, n_x_max, n_y_max)
             # crop_img = input_image.crop(crop_area).convert('L')
             crop_img = input_image.crop(crop_area).convert('RGB')
-            # if SSIM_MODE != "rgb": continue;
+            if SSIM_MODE != "rgb": continue;
             if crop_img.size != crop_img_base.size:
                 crop_img = crop_img.resize(crop_img_base.size, Image.LANCZOS)
 
-            s_score = ssim(crop_img, crop_img_base)
+            if SSIM_MODE == "rgb":
+                s_score = ssim_rgb(crop_img, crop_img_base)
+            elif SSIM_MODE == "avg":
+                s_score = ssim_avg(crop_img, crop_img_base)
+            elif SSIM_MODE == "gray":
+                s_score = ssim_gray(crop_img, crop_img_base)
+            else:
+                raise ValueError(f"无效的SSIM模式: {SSIM_MODE}. 请使用 'rgb' 或 'avg'或 'gray'")
+            #s_score = ssim(crop_img, crop_img_base)
             if s_score < ssim_t:
                 #print("图像ssim相似度:", s_score, " 跳过")
                 continue
             #print("图像ssim相似度:", s_score, "不跳过")
-            # 将plist和slist结合成一个列表，其中每个元素是一个元组，包含plist中的点和对应的分数
             combined = list(zip(plist, slist))
-            # 根据分数（slist的值）降序排序
             sorted_combined = sorted(combined, key=lambda x: x[1], reverse=True)
-            # 提取排序后的plist（点）
             sorted_plist = [item[0] for item in sorted_combined]
-            # 提取排序后的 slist（分数）
             sorted_slist = [item[1] for item in sorted_combined]
             # Mark and delete redundant points
             selected_list.append(sorted_plist[0])
-
             for i,redundant_point in enumerate(sorted_plist[1:]):
                 current_points_copy.remove(redundant_point)
                 current_scores_copy.remove(sorted_slist[i+1])
@@ -691,7 +602,6 @@ def interactive_adaptation_boxs_del(img_n, EXEMPLAR_BBX, Image_path, points_005,
                 draw.ellipse(
                     (redundant_point[0] - 2, redundant_point[1] - 2, redundant_point[0] + 2, redundant_point[1] + 2),
                     width=1, outline='white', fill=(255, 255, 255))
-
             # selected_list.append(plist[0])
             # for i, redundant_point in enumerate(plist[1:]):
             #     current_points_copy.remove(redundant_point)
@@ -733,15 +643,15 @@ def interactive_adaptation_boxs_del_all(img_n, EXEMPLAR_BBX, Image_path, points_
                 plist.append(p)
                 slist.append(current_scores_copy[i])
         return pnum, plist, slist
-    # Calculate bounding box dimensions
+
     x_min, x_max = min(EXEMPLAR_BBX[0], EXEMPLAR_BBX[2]), max(EXEMPLAR_BBX[0], EXEMPLAR_BBX[2])
     y_min, y_max = min(EXEMPLAR_BBX[1], EXEMPLAR_BBX[3]), max(EXEMPLAR_BBX[1], EXEMPLAR_BBX[3])
     x_len, y_len = x_max - x_min, y_max - y_min
-
     crop_area_base = (x_min, y_min, x_max, y_max)
     input_image = Image.open(Image_path).convert('RGB').resize((Display_width, Display_height), Image.LANCZOS)
     # crop_img_base = input_image.crop(crop_area_base).convert('L')
     crop_img_base = input_image.crop(crop_area_base).convert('RGB')
+
     img_array_n = np.array(crop_img_base).reshape(1, -1)
     max_pixel = max(img_array_n[0])
     current_points_copy = current_points[:]
@@ -759,13 +669,14 @@ def interactive_adaptation_boxs_del_all(img_n, EXEMPLAR_BBX, Image_path, points_
             crop_area = (n_x_min, n_y_min, n_x_max, n_y_max)
             # crop_img = input_image.crop(crop_area).convert('L')
             crop_img = input_image.crop(crop_area).convert('RGB')
+
+
             if crop_img.size != crop_img_base.size:
                 crop_img = crop_img.resize(crop_img_base.size, Image.LANCZOS)
+
             s_score = ssim(crop_img, crop_img_base)
             if s_score < ssim_t:
                 continue
-
-            # Mark and delete redundant points
             #selected_list.append(plist[0])
             #for redundant_point in plist[1:]:
             for i,redundant_point in enumerate(plist[:]):
@@ -804,47 +715,6 @@ def HungarianMatch(p_gt,p_prd,threshold=0.5):
     return int(len(cost_martix[row_ind, col_ind][np.where(cost_martix[row_ind, col_ind] < threshold)]))
 
 
-def HungarianMatch_by_distance(p_gt, p_prd, distance_threshold=10):
-    """
-    使用匈牙利算法进行点匹配，成本为点对间的欧氏距离。
-    只有当最优匹配对的距离小于 distance_threshold 时，才被计为一次成功匹配 (TP)。
-
-    参数:
-    p_gt (list): 真实点坐标列表，例如 [[x1, y1], [x2, y2], ...]
-    p_prd (list): 预测点坐标列表，格式同上
-    distance_threshold (float): 用于判断匹配是否成功的最大距离阈值
-
-    返回:
-    int: 成功匹配的数量 (TP)
-    """
-    # 1. 构建成本矩阵，矩阵的值为 p_gt 中的点与 p_prd 中的点之间的欧氏距离
-    # cost_matrix[i, j] 表示第 i 个真实点与第 j 个预测点之间的距离
-    num_gt = len(p_gt)
-    num_prd = len(p_prd)
-
-    # 处理任一列表为空的边界情况
-    if num_gt == 0 or num_prd == 0:
-        return 0
-
-    cost_matrix = np.zeros((num_gt, num_prd))
-    for i, point_gt in enumerate(p_gt):
-        for j, point_prd in enumerate(p_prd):
-            # 计算欧氏距离并填充到成本矩阵
-            dist = np.linalg.norm(np.array(point_gt) - np.array(point_prd))
-            cost_matrix[i, j] = dist
-
-    # 2. 使用匈牙利算法（linear_sum_assignment）找到总成本最小的匹配
-    # 这会确保每个真实点最多只匹配一个预测点，反之亦然（一对一匹配）
-    row_ind, col_ind = linear_sum_assignment(cost_matrix)
-
-    # 3. 从最优匹配中筛选出符合距离阈值的匹配对
-    # 获取所有最优匹配对的实际距离
-    matched_distances = cost_matrix[row_ind, col_ind]
-
-    # 计算距离小于阈值的匹配数量，这就是TP
-    tp_count = np.sum(matched_distances < distance_threshold)
-
-    return int(tp_count)
 def pointF1_score(TP,p_gt,p_prd):
     FP = int(len(p_prd)) - TP
     FN = int(len(p_gt)) - TP
@@ -1082,7 +952,8 @@ def threeboxes_simulation(model, device, transform, args, log_path, root_path, s
     # 用来存储所有解析出来的框坐标及对应的文件名
     boxes_list = []
     # 定义正则表达式来匹配文件名和框的坐标（提取元组）
-    file_pattern = re.compile(r"IMG_\d+\.tif")
+    # file_pattern = re.compile(r"IMG_\d+\.tif")
+    file_pattern = re.compile(r"\d+\.png")
     box_pattern_del_all = re.compile(r"#sized_box_del_all:\((\d+), (\d+), (\d+), (\d+)\)")
     box_pattern_del_re = re.compile(r"#sized_box_del_re:\((\d+), (\d+), (\d+), (\d+)\)")
     box_pattern_add = re.compile(r"#sized_box_add:\((\d+), (\d+), (\d+), (\d+)\)")
@@ -1170,7 +1041,8 @@ def threeboxes_simulation(model, device, transform, args, log_path, root_path, s
             f"Precision={m_Precision_score_ori}, "
             f"Recall={m_Recall_score_ori}, "
             f"MAE={mae_ori}, "
-            f"MSE={mse_ori}\n"
+            f"MSE={mse_ori},"
+            f"RMSE={math.sqrt(mse_ori)}\n"
         )
 
         # 单行记录当前模型性能指标
@@ -1179,7 +1051,8 @@ def threeboxes_simulation(model, device, transform, args, log_path, root_path, s
             f"Precision={m_Precision_score_cur}, "
             f"Recall={m_Recall_score_cur}, "
             f"MAE={mae_cur}, "
-            f"MSE={mse_cur}\n"
+            f"MSE={mse_cur},"
+            f"RMSE={math.sqrt(mse_cur)}\n"
         )
     # with open(run_log_path, "a") as log_file:
     #     log_file.write(f'\nEval Log {time.strftime("%c")}\n')
@@ -1207,7 +1080,7 @@ def get_args_parser():
                         help="name of the convolutional backbone to use")
     # parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/NEFCell_best_e1500.pth',
     #                     help='path where the trained weights saved')
-    parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/APGCC_NEFCell_best_e3500.pth',
+    parser.add_argument('--weight_path', default='/home/hp/zrj/prjs/pth/APGCC_BCD_best.pth',
                         help='path where the trained weights saved')
     parser.add_argument('--row', default=2, type=int,
                         help="row number of anchor points")
@@ -1245,8 +1118,8 @@ def get_args_parser():
     return parser
 def main(args):
     #与非交互式计数方法对比,初始预测模型选择训练1500个epoch的
-    log_path = '/home/hp/zrj/prjs/AICC/interact_box_log_test192.txt'
-    root_path = '/home/hp/zrj/Data/NEFCell/DATA_ROOT/test'  # 43090
+    log_path = '/home/hp/zrj/prjs/AICC/BCD_interact_box_log.txt'
+    root_path = '/home/hp/zrj/prjs/MYP2PNET_ROOT/crowd_datasets/BC_DATASET/DATA_ROOT/test'  # 3090
     # 定义要测试的模式列表
     modes = ['PE', 'PF', 'PE_PF']
     mode = 'PE_PF'

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="hp@10.195.156.175:22">
+  <component name="PublishConfigData" autoUpload="Always" serverName="hp@10.204.29.57:55554">
     <serverData>
       <paths name="dell@10.195.198.25:22">
         <serverdata>
@@ -52,6 +52,20 @@
         </serverdata>
       </paths>
       <paths name="hp@10.195.156.175:22">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/hp/zrj/prjs/AICC" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="hp@10.195.156.175:22 password">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="hp@10.204.29.57:55554">
         <serverdata>
           <mappings>
             <mapping deploy="/home/hp/zrj/prjs/AICC" local="$PROJECT_DIR$" />
